@@ -4,8 +4,8 @@
 #include <QWidget>
 #include <QPushButton>
 #include <QLineEdit>
-#include "videowidget.hpp"
-#include "screenshotwindow.hpp"
+#include "video/videowidget.hpp"
+#include "sceenshot/screenshotwindow.hpp"
 
 class MainWidget : public QWidget
 {
@@ -17,7 +17,9 @@ private:
     void createLayout();
     void initializeConnetions();
     void buttonScreenPress();
+    void buttonSearchPress();
     QPushButton* _screenBtn;
+    QPushButton* _searchBtn;
     VideoWidget* _videoWidget;
 
 };

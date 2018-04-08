@@ -7,11 +7,17 @@
 #include <iostream>
 
 VideoWidget::VideoWidget(QWidget *parent):
-    QVideoWidget(parent)
+    QVideoWidget(parent),
+    _imageDetector(new ImageDetector(this))
 {
     setFixedSize(WIDGETWIDTH, WIDGETWIDTH * HEIGHT / WIDTH);
     _initFfmpeg();
     _initThread();
+}
+
+void VideoWidget::StartStopRecognition(bool f)
+{
+    _searching = f;
 }
 
 QPixmap VideoWidget::GetPixmap()
@@ -23,12 +29,20 @@ void VideoWidget::paintEvent(QPaintEvent *event)
 {
     QVideoWidget::paintEvent(event);
 
+    QPainter painter(this);
     if (_pixmap.size() != QSize(0, 0)){
-        QPainter painter(this);
         painter.drawPixmap(rect(), _pixmap);
-        painter.end();
     }
 
+    if (_imageDetector->figureIsFound())
+    {
+        painter.drawRect(_imageDetector->getRect());
+//        Qfont font = setPointSize(10);
+//        painter->setFont(font);
+        painter.drawText(_imageDetector->getRect(), Qt::AlignTop, FIGURENAMES[_imageDetector->getType() - 1]);
+    }
+
+    painter.end();
     return;
 }
 
@@ -58,6 +72,7 @@ void VideoWidget::_initFfmpeg()
 void VideoWidget::_update(QPixmap pixmap)
 {
     _pixmap = pixmap;
+    if (_searching) _imageDetector->detectImage(_pixmap);
     repaint();
 }
 

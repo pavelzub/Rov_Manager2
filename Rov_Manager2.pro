@@ -11,7 +11,8 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = Rov_Manager2
 TEMPLATE = app
 
-INCLUDEPATH += $$PWD/ffmpeg/include
+INCLUDEPATH += $$PWD/ffmpeg/include\
+    $$PWD/OpenCV/include
 
 LIBS += -L$$PWD/ffmpeg/lib \
     -lavcodec \
@@ -21,7 +22,26 @@ LIBS += -L$$PWD/ffmpeg/lib \
     -lavfilter \
     -lswresample \
     -lavformat \
-    -lswscale
+    -lswscale \
+    -L$$PWD/OpenCV/lib \
+    -lopencv_highgui2413 \
+    -lopencv_calib3d2413 \
+    -lopencv_contrib2413 \
+    -lopencv_core2413 \
+    -lopencv_features2d2413 \
+    -lopencv_flann2413 \
+    -lopencv_gpu2413 \
+    -lopencv_imgproc2413 \
+    -lopencv_legacy2413 \
+    -lopencv_ml2413 \
+    -lopencv_nonfree2413 \
+    -lopencv_objdetect2413 \
+    -lopencv_ocl2413 \
+    -lopencv_photo2413 \
+    -lopencv_stitching2413 \
+    -lopencv_superres2413 \
+    -lopencv_video2413 \
+    -lopencv_videostab2413
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
 # depend on your compiler). Please consult the documentation of the
@@ -38,15 +58,19 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
     mainwidget.cpp \
-    screenlable.cpp \
-    screenshotwindow.cpp \
-    videostreamparser.cpp \
-    videowidget.cpp
+    sceenshot/screenlable.cpp \
+    sceenshot/screenshotwindow.cpp \
+    video/videostreamparser.cpp \
+    video/videowidget.cpp \
+    finder/finder.cpp \
+    finder/imagedetector.cpp
 
 HEADERS += \
     mainwidget.hpp \
-    screenlable.hpp \
-    screenshotwindow.hpp \
-    videostreamparser.hpp \
-    videowidget.hpp \
-    mainwindow.hpp
+    sceenshot/screenlable.hpp \
+    sceenshot/screenshotwindow.hpp \
+    video/videostreamparser.hpp \
+    video/videowidget.hpp \
+    mainwindow.hpp \
+    finder/finder.hpp \
+    finder/imagedetector.hpp
