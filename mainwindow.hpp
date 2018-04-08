@@ -4,7 +4,7 @@
 #include <QMainWindow>
 
 #include "mainwidget.hpp"
-
+#include "calculationwindow.hpp"
 
 class MainWindow : public QMainWindow
 {
@@ -15,8 +15,11 @@ public:
     ~MainWindow();
 
 private:
+    void _createMenu();
+    void _initConnections();
+
     MainWidget* _mainwidget;
-    void initializeConnections();
+    CalculationWindow* _calculationWindow;
 };
 
 #endif // MAINWINDOW_HPP

@@ -63,7 +63,8 @@ SOURCES += \
     video/videostreamparser.cpp \
     video/videowidget.cpp \
     finder/finder.cpp \
-    finder/imagedetector.cpp
+    finder/imagedetector.cpp \
+    calculationwindow.cpp
 
 HEADERS += \
     mainwidget.hpp \
@@ -73,4 +74,5 @@ HEADERS += \
     video/videowidget.hpp \
     mainwindow.hpp \
     finder/finder.hpp \
-    finder/imagedetector.hpp
+    finder/imagedetector.hpp \
+    calculationwindow.hpp
