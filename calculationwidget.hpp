@@ -1,5 +1,5 @@
-#ifndef CALCULATIONWINDOW_HPP
-#define CALCULATIONWINDOW_HPP
+#ifndef CALCULATIONWIDGET_HPP
+#define CALCULATIONWIDGET_HPP
 
 #include <QMainWindow>
 #include <QHBoxLayout>
@@ -10,11 +10,11 @@
 #include <QString>
 #include <QLabel>
 
-class CalculationWindow : public QMainWindow
+class CalculationWidget : public QWidget
 {
     Q_OBJECT
 public:
-    explicit CalculationWindow(QWidget *parent = nullptr);
+    explicit CalculationWidget(QWidget *parent = nullptr);
 
 private:
     void _createLayouts();
@@ -36,4 +36,4 @@ private:
 
 };
 
-#endif // CALCULATIONWINDOW_HPP
+#endif // CALCULATIONWIDGET_HPP

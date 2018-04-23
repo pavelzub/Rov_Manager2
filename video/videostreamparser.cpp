@@ -3,6 +3,7 @@
 #include <queue>
 #include <QDate>
 #include <QScopedPointer>
+#include <QThread>
 
 VideoStreamParser::VideoStreamParser(QString url, QObject *parent) :
     QObject(parent)
@@ -12,6 +13,12 @@ VideoStreamParser::VideoStreamParser(QString url, QObject *parent) :
 
 void VideoStreamParser::process()
 {
+//       QPixmap test("testImage\\2   .jpg");
+
+//       for (;;){
+//           emit repaint(test);
+//           QThread::msleep(20);
+//       }
     while(!_init()){
         std::cout << "Init error: " << _url.toStdString()  << std::endl;
     }
@@ -40,7 +47,7 @@ void VideoStreamParser::process()
 
           QPixmap pixmap = frameToQPixmap(mFrame, _mVideoDecodeContext);
           std::cout << "stream: " << pixmap.width() << "x" << pixmap.height() << std::endl;
-          emit(repaint(pixmap));
+          emit repaint(pixmap);
 
           av_free_packet(&pkt);
         }

@@ -22,10 +22,15 @@ public:
     QRect getRect();
     Type getType();
 
+signals:
+    void detect(QPixmap);
+
 private slots:
     void _stopDetection();
 
 private:
+    void _createThread();
+
     bool _isWorking = false;
     Type _type = NONE;
     Type _newType;

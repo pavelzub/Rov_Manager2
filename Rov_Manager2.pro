@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui multimedia multimediawidgets
+QT       += core gui multimedia multimediawidgets printsupport
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -64,7 +64,17 @@ SOURCES += \
     video/videowidget.cpp \
     finder/finder.cpp \
     finder/imagedetector.cpp \
-    calculationwindow.cpp
+    camerawidget.cpp \
+    calculationwidget.cpp \
+    obswidget.cpp \
+    qcustomplot/qcustomplot.cpp \
+    ethernet/datastore.cpp \
+    ethernet/tcpconnetor.cpp \
+    rov_data_types/base_packet_t.cpp \
+    rov_data_types/binary_stream.cpp \
+    rov_data_types/crc.cpp \
+    rov_data_types/rov_data_types.cpp \
+    rov_data_types/serializable.cpp
 
 HEADERS += \
     mainwidget.hpp \
@@ -75,4 +85,15 @@ HEADERS += \
     mainwindow.hpp \
     finder/finder.hpp \
     finder/imagedetector.hpp \
-    calculationwindow.hpp
+    camerawidget.hpp \
+    calculationwidget.hpp \
+    obswidget.hpp \
+    qcustomplot/qcustomplot.hpp \
+    ethernet/datastore.hpp \
+    ethernet/tcpconnetor.hpp \
+    rov_data_types/base_packet_t.hpp \
+    rov_data_types/binary_stream.hpp \
+    rov_data_types/crc.hpp \
+    rov_data_types/meta.hpp \
+    rov_data_types/rov_data_types.hpp \
+    rov_data_types/serializable.hpp

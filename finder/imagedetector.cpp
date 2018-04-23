@@ -6,27 +6,16 @@
 
 ImageDetector::ImageDetector(QObject *parent) : QObject(parent)
 {
-
+    _createThread();
 }
 
 void ImageDetector::detectImage(QPixmap pixmap)
 {
     if (_isWorking) return;
+
     _isWorking = true;
 
-    _newType = NONE;
-    QThread* thread = new QThread;
-    Finder* finder = new Finder(&_newType, &_newRect, pixmap);
-
-    finder->moveToThread(thread);
-
-    connect(thread, &QThread::started, finder, &Finder::process);
-    connect(finder, &Finder::finished, thread, &QThread::quit);
-    connect(finder, &Finder::finished, this, &ImageDetector::_stopDetection);
-    connect(finder, &Finder::finished, finder, &Finder::deleteLater);
-    connect(thread, &QThread::finished, thread, &QThread::deleteLater);
-
-    thread->start();
+    emit detect(pixmap);
 }
 
 bool ImageDetector::figureIsFound()
@@ -54,4 +43,15 @@ void ImageDetector::_stopDetection()
     _isWorking = false;
     _type = _newType;
     _rect = _newRect;
+}
+
+void ImageDetector::_createThread()
+{
+    QThread* thread = new QThread;
+    Finder* finder = new Finder(&_newType, &_newRect);
+
+    finder->moveToThread(thread);
+    connect(finder, &Finder::findImage, this, &ImageDetector::_stopDetection);
+    connect(this, &ImageDetector::detect, finder, &Finder::detect);
+    thread->start();
 }

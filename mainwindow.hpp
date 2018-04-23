@@ -4,7 +4,7 @@
 #include <QMainWindow>
 
 #include "mainwidget.hpp"
-#include "calculationwindow.hpp"
+#include "calculationwidget.hpp"
 
 class MainWindow : public QMainWindow
 {
@@ -19,7 +19,7 @@ private:
     void _initConnections();
 
     MainWidget* _mainwidget;
-    CalculationWindow* _calculationWindow;
+    CalculationWidget* _calculationWindow;
 };
 
 #endif // MAINWINDOW_HPP

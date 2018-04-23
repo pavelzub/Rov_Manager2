@@ -1,4 +1,4 @@
-#include "calculationwindow.hpp"
+#include "calculationwidget.hpp"
 #include <QProcess>
 #include <QDir>
 #include <QDoubleValidator>
@@ -8,8 +8,8 @@
 #include <QClipboard>
 #include <QApplication>
 
-CalculationWindow::CalculationWindow(QWidget *parent) :
-    QMainWindow(parent),
+CalculationWidget::CalculationWidget(QWidget *parent) :
+    QWidget(parent),
     _startUpSpeed(new QLineEdit(this)),
     _startHorSpeed(new QLineEdit(this)),
     _fallUpSpeed(new QLineEdit(this)),
@@ -26,9 +26,8 @@ CalculationWindow::CalculationWindow(QWidget *parent) :
     _initConnections();
 }
 
-void CalculationWindow::_createLayouts()
+void CalculationWidget::_createLayouts()
 {
-    QWidget* mainWidget = new QWidget;
     QVBoxLayout* mainLayout = new QVBoxLayout;
     QHBoxLayout* Layout_1 = new QHBoxLayout;
     QHBoxLayout* Layout_2 = new QHBoxLayout;
@@ -69,16 +68,15 @@ void CalculationWindow::_createLayouts()
     mainLayout->addLayout(Layout_1);
     mainLayout->addLayout(Layout_2);
     mainLayout->addLayout(Layout_3);
-    mainWidget->setLayout(mainLayout);
-    setCentralWidget(mainWidget);
+    setLayout(mainLayout);
 }
 
-void CalculationWindow::_initConnections()
+void CalculationWidget::_initConnections()
 {
-    connect(_calculateBtn, &QPushButton::released, this, &CalculationWindow::_calculate);
+    connect(_calculateBtn, &QPushButton::released, this, &CalculationWidget::_calculate);
 }
 
-QLayout *CalculationWindow::_createBlock(QString name, QString firstFieldName, QWidget *firstFieldVal, QString secondFieldName, QWidget *secondFieldVal)
+QLayout *CalculationWidget::_createBlock(QString name, QString firstFieldName, QWidget *firstFieldVal, QString secondFieldName, QWidget *secondFieldVal)
 {
     QVBoxLayout* Layout = new QVBoxLayout;
     QLabel* Name = new QLabel;
@@ -103,7 +101,7 @@ QLayout *CalculationWindow::_createBlock(QString name, QString firstFieldName, Q
     return Layout;
 }
 
-void CalculationWindow::_calculate()
+void CalculationWidget::_calculate()
 {
     QProcess proc;
 

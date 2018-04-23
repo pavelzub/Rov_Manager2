@@ -11,25 +11,24 @@ class Finder : public QObject
 {
     Q_OBJECT
 public:
-    explicit Finder(Type* type, QRect* rect, QPixmap pixmap, QObject *parent = nullptr);
+    explicit Finder(Type* type, QRect* rect, QObject *parent = nullptr);
 
 signals:
-    void finished();
+    void findImage();
 
 public slots:
-    void process();
+    void detect(QPixmap pixmap);
 
 private:
     const int COLORTOLERANCE = 100;
     const int MAXSQUARE = 1000000;
     const int MINSQUARE = 10000;
 
-    QPixmap _pixmap;
     Type* _type;
     QRect* _rect;
 
-    void _detectFigure(QPixmap pixmap);
-    void _detectText(QPixmap pixmap);
+    bool _detectFigure(QPixmap pixmap);
+    bool _detectText(QPixmap pixmap);
 
     FigureColor _getFigureColor(QColor color);
     float _getSquare(std::vector<cv::Point2f> poitns);

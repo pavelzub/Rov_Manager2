@@ -6,11 +6,11 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
       _mainwidget(new MainWidget(this)),
-      _calculationWindow(new CalculationWindow(this))
+      _calculationWindow(new CalculationWidget(this))
 {
     this->setCentralWidget(_mainwidget);
-    _createMenu();
-    _initConnections();
+//    _createMenu();
+//    _initConnections();
 }
 
 MainWindow::~MainWindow()

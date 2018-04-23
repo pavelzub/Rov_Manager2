@@ -14,24 +14,22 @@ class VideoWidget : public QVideoWidget
 public:
     VideoWidget(QWidget *parent = nullptr);
     void StartStopRecognition(bool f);
+    void Update(QPixmap pixmap);
     QPixmap GetPixmap();
 
 protected:
     void paintEvent(QPaintEvent *event) override;
 
 private:
-    void _initThread();
     void _initFfmpeg();
 
     const int WIDTH = 16;
     const int HEIGHT = 9;
     const int WIDGETWIDTH = 700;
-    const QString URL = "udp://192.168.1.255:1234";
     bool _searching = false;
     ImageDetector* _imageDetector;
     QPixmap _pixmap;
 
-    void _update(QPixmap pixmap);
 };
 
 #endif // MYVIDEOWIDGET_HPP

@@ -5,29 +5,88 @@
 
 #define sqr(x) ((x)*(x))
 
-Finder::Finder(Type *type, QRect *rect, QPixmap pixmap, QObject *parent) : QObject(parent)
+Finder::Finder(Type *type, QRect *rect, QObject *parent) : QObject(parent)
 {
     _type = type;
     _rect = rect;
-    _pixmap = pixmap;
 }
 
-void Finder::process()
+void Finder::detect(QPixmap pixmap)
 {
-    _detectFigure(_pixmap);
-    if (*_type == NONE) _detectText(_pixmap);
-    emit(finished());
+    QImage image = pixmap.toImage();
+    cv::Mat img(image.height(),image.width(),CV_8UC4,
+                static_cast<void*>(const_cast<uchar *>(image.constBits())),
+                static_cast<size_t>(image.bytesPerLine()));
+    cv::imshow("bin", img);
+
+    int hMin = 0;
+    int hMax = 0;
+
+    int sMin = 0;
+    int sMax = 0;
+
+    int vMin = 0;
+    int vMax = 0;
+
+    int chMax = 255;
+
+
+    char hMinName[50];
+    char hMaxName[50];
+
+    char sMinName[50];
+    char sMaxName[50];
+
+    char vMinName[50];
+    char vMaxName[50];
+
+    std::sprintf(hMinName, "H min", hMin);
+    std::sprintf(hMaxName, "H max", hMax);
+
+    std::sprintf(sMinName, "S min", sMin);
+    std::sprintf(sMaxName, "S max", sMax);
+
+    std::sprintf(vMinName, "V min", vMin);
+    std::sprintf(vMaxName, "V max", vMax);
+
+    cv::createTrackbar(hMinName, "bin", &hMin, chMax);
+    cv::createTrackbar(hMaxName, "bin", &hMax, chMax);
+
+    cv::createTrackbar(sMinName, "bin", &sMin, chMax);
+    cv::createTrackbar(sMaxName, "bin", &sMax, chMax);
+
+    cv::createTrackbar(vMinName, "bin", &vMin, chMax);
+    cv::createTrackbar(vMaxName, "bin", &vMax, chMax);
+
+    while (true) {
+        cv::Mat image = img.clone();
+        cv::imshow("bin", image);
+        cv::cvtColor(image, image, CV_BGR2HSV);
+        cv::Scalar lower(hMin, sMin, vMin);
+        cv::Scalar upper(hMax, sMax, vMax);
+        cv::inRange(image, lower, upper, image);
+        cv::imshow("image", image);
+        cv::waitKey(10);
+    }
+//    *_type = NONE;
+//    _detectFigure(pixmap);
+////            || _detectText(pixmap);
+
+//    emit findImage();
 }
 
-void Finder::_detectFigure(QPixmap pixmap)
+bool Finder::_detectFigure(QPixmap pixmap)
 {
     cv::Mat image = _getGrauScaleMat(pixmap.toImage());
     std::vector<std::vector<cv::Point> > contours;
-
-    double cannyParams = cv::threshold(image, image, 0, 255, CV_THRESH_BINARY_INV + CV_THRESH_OTSU);
-    cv::Canny(image, image, cannyParams, cannyParams / 2.0);
-    cv::findContours(image, contours, CV_RETR_TREE, CV_CHAIN_APPROX_NONE);
-    cv::drawContours(image, contours, -1, cv::Scalar(100,200,255));
+    cv::imshow("2", image);
+    cv::waitKey(1);
+//    double cannyParams = cv::threshold(image, image, 0, 10, CV_THRESH_BINARY_INV + CV_THRESH_OTSU);
+//    cv::Canny(image, image, cannyParams, cannyParams / 2.0);
+    cv::findContours(image, contours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
+    cv::drawContours(image, contours, 0, cv::Scalar(100,200,255));
+    cv::imshow("1", image);
+    cv::waitKey(1);
 
     for (std::size_t i = 0; i < contours.size(); i++)
     {
@@ -54,11 +113,12 @@ void Finder::_detectFigure(QPixmap pixmap)
 
         *_rect = QRect(min, max);
         *_type = static_cast<Type>((hull.size() - 3) * 3 + color);
+        return true;
     }
-
+    return false;
 }
 
-void Finder::_detectText(QPixmap pixmap)
+bool Finder::_detectText(QPixmap pixmap)
 {
 //    QImage image = pixmap.toImage();
 //    for (int i = 0; i < image.width(); i++)
@@ -132,7 +192,7 @@ void Finder::_detectText(QPixmap pixmap)
                 scene.push_back( keypoints_scene[static_cast<size_t>(good_matches[i].trainIdx)].pt );
             }
 
-            if (obj.size() * scene.size() <= 16) return;
+            if (obj.size() * scene.size() <= 16) return false;
             cv::Mat H = cv::findHomography(obj, scene, CV_RANSAC);
             std::vector<cv::Point2f> obj_corners(4);
             obj_corners[0] = cvPoint(0,0);
@@ -147,11 +207,12 @@ void Finder::_detectText(QPixmap pixmap)
             if (cv::isContourConvex(scene_corners) && square > MINSQUARE && square < MAXSQUARE){
                 *_rect = _getRect(scene_corners);
                 *_type = static_cast<Type>(i + 1);
-                return;
+                return true;
             }
         }
     } catch (...) {
     }
+    return false;
 }
 
 FigureColor Finder::_getFigureColor(QColor color)

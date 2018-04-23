@@ -3,56 +3,49 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QLabel>
-#include <iostream>
+#include <QThread>
 #include <QDoubleValidator>
 
+#include <video/videostreamparser.hpp>
+
 MainWidget::MainWidget(QWidget *parent) :
-    QWidget(parent),
-    _screenBtn(new QPushButton(this)),
-    _searchBtn(new QPushButton(this)),
-    _videoWidget(new VideoWidget(this))
+    QTabWidget(parent),
+    _cameraWidget(new CameraWidget(this)),
+    _calculationWidget(new CalculationWidget(this)),
+    _obsWidget(new ObsWidget(this))
 {
-    createLayout();
-    initializeConnetions();
+    _createLayout();
+    _initConnetions();
+    _initVideoParser();
+    _initVideoParser();
 }
 
-void MainWidget::createLayout()
+void MainWidget::_createLayout()
 {
-    QHBoxLayout *mainLayout = new QHBoxLayout;
-    QHBoxLayout* camLayout = new QHBoxLayout;
-    QVBoxLayout* menuLayout = new QVBoxLayout;\
-
-    camLayout->addWidget(_videoWidget);
-    _screenBtn->setText("Скриншот");
-    _searchBtn->setText("Начать распознавание");
-
-    menuLayout->addWidget(_screenBtn);
-    menuLayout->addWidget(_searchBtn);
-    mainLayout->addLayout(camLayout);
-    mainLayout->addLayout(menuLayout);
-    this->setLayout(mainLayout);
+    addTab(new CameraWidget(this), "Залепа");
+    addTab(_cameraWidget, "Камера");
+    addTab(_calculationWidget, "Вычисления");
+    addTab(_obsWidget, "Сейсмометр");
+    setTabEnabled(0, false);
 }
 
-void MainWidget::initializeConnetions()
+void MainWidget::_initConnetions()
 {
-    connect(_screenBtn, &QPushButton::pressed, this, &MainWidget::buttonScreenPress);
-    connect(_searchBtn, &QPushButton::pressed, this, &MainWidget::buttonSearchPress);
+
 }
 
-void MainWidget::buttonScreenPress()
+void MainWidget::_initVideoParser()
 {
-    ScreenshotWindow* w(new ScreenshotWindow(_videoWidget->GetPixmap(), this));
-    w->show();
-}
+    QThread* thread = new QThread;
+    VideoStreamParser* parser = new VideoStreamParser(URL);
 
-void MainWidget::buttonSearchPress()
-{
-    if (_searchBtn->text() == "Начать распознавание"){
-        _searchBtn->setText("Остановить распознавание");
-        _videoWidget->StartStopRecognition(true);
-    }
-    else {
-        _searchBtn->setText("Начать распознавание");
-        _videoWidget->StartStopRecognition(false);
-    }
+    parser->moveToThread(thread);
+
+    connect(thread, &QThread::started, parser, &VideoStreamParser::process);
+    connect(parser, &VideoStreamParser::finished, thread, &QThread::quit);
+    connect(parser, &VideoStreamParser::repaint, _cameraWidget, &CameraWidget::UpdateCamera);
+    connect(parser, &VideoStreamParser::finished, parser, &VideoStreamParser::deleteLater);
+    connect(thread, &QThread::finished, thread, &QThread::deleteLater);
+
+    thread->start();
 }
