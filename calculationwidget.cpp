@@ -7,6 +7,8 @@
 #include <QLineF>
 #include <QClipboard>
 #include <QApplication>
+#include <Python.h>
+#include <QDebug>
 
 CalculationWidget::CalculationWidget(QWidget *parent) :
     QWidget(parent),
@@ -24,6 +26,14 @@ CalculationWidget::CalculationWidget(QWidget *parent) :
 {
     _createLayouts();
     _initConnections();
+//    Py_Initialize();
+//    PyObject* module = PyImport_Import(PyString_FromString("main"));
+//    PyObject* function = PyObject_GetAttrString(module, "foo");
+//    PyObject* args = PyTuple_Pack(2, PyString_FromString("t"),  PyFloat_FromDouble(2.0));
+//    PyObject* ans = PyObject_CallObject(function, args);
+//    double result = PyFloat_AsDouble(ans);
+//    qDebug() << result;
+//    Py_Finalize();
 }
 
 void CalculationWidget::_createLayouts()

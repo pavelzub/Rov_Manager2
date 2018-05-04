@@ -3,11 +3,12 @@
 
 #include <QObject>
 #include <QBitmap>
+#include <QSettings>
 
 enum Type {NONE, REDTRIANGLE, YELLOWTRIANGLE, BLUETRIANGLE, REDRECT, YELLOWRECT, BLUERECT};
 enum FigureColor {OTHER, RED, YELLOW, BLUE};
-const QString FIGURENAMES[6] = {"REDTRIANGLE", "YELLOWTRIANGLE", "BLUETRIANGLE",
-                                "REDRECT", "YELLOWRECT", "BLUERECT"};
+const QString FIGURENAMES[6] = {"A", "B", "C",
+                                "D", "E", "F"};
 const QString TEMPLATESPATH[6] = {"templates//1.jpg", "templates//2.jpg", "templates//3.jpg",
                                    "templates//4.jpg", "templates//5.jpg", "templates//6.jpg"};
 
@@ -15,7 +16,7 @@ class ImageDetector : public QObject
 {
     Q_OBJECT
 public:
-    explicit ImageDetector(QObject *parent = nullptr);
+    explicit ImageDetector(QSettings* settings, QObject *parent = nullptr);
     void detectImage(QPixmap pixmap);
     bool figureIsFound();
     bool isWorking();
@@ -36,6 +37,7 @@ private:
     Type _newType;
     QRect _rect;
     QRect _newRect;
+    QSettings* _settings;
 };
 
 #endif // IMAGEDETECTOR_HPP

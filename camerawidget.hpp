@@ -3,13 +3,15 @@
 
 #include <QWidget>
 #include <QPushButton>
+#include <QSettings>
+
 #include "video/videowidget.hpp"
 
 class CameraWidget : public QWidget
 {
     Q_OBJECT
 public:
-    explicit CameraWidget(QWidget *parent = nullptr);
+    explicit CameraWidget(QSettings* settings, QWidget *parent = nullptr);
     void UpdateCamera(QPixmap pixmap);
 
 private:
@@ -21,7 +23,6 @@ private:
     QPushButton* _screenBtn;
     QPushButton* _searchBtn;
     VideoWidget* _videoWidget;
-
 };
 
 #endif // CAMERAWIFGET_HPP

@@ -5,6 +5,7 @@
 #include <QVideoWidget>
 #include <QPainter>
 #include <QString>
+#include <QSettings>
 
 #include "finder/imagedetector.hpp"
 
@@ -12,7 +13,7 @@ class VideoWidget : public QVideoWidget
 {
     Q_OBJECT
 public:
-    VideoWidget(QWidget *parent = nullptr);
+    VideoWidget(QSettings* settings, QWidget *parent = nullptr);
     void StartStopRecognition(bool f);
     void Update(QPixmap pixmap);
     QPixmap GetPixmap();

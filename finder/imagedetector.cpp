@@ -4,8 +4,9 @@
 #include <iostream>
 #include <QThread>
 
-ImageDetector::ImageDetector(QObject *parent) : QObject(parent)
+ImageDetector::ImageDetector(QSettings *settings, QObject *parent) : QObject(parent)
 {
+    _settings = settings;
     _createThread();
 }
 
@@ -48,7 +49,7 @@ void ImageDetector::_stopDetection()
 void ImageDetector::_createThread()
 {
     QThread* thread = new QThread;
-    Finder* finder = new Finder(&_newType, &_newRect);
+    Finder* finder = new Finder(_settings, &_newType, &_newRect);
 
     finder->moveToThread(thread);
     connect(finder, &Finder::findImage, this, &ImageDetector::_stopDetection);

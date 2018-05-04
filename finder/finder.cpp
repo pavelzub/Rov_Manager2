@@ -5,74 +5,19 @@
 
 #define sqr(x) ((x)*(x))
 
-Finder::Finder(Type *type, QRect *rect, QObject *parent) : QObject(parent)
+Finder::Finder(QSettings *settings, Type *type, QRect *rect, QObject *parent) : QObject(parent)
 {
+    _settings = settings;
     _type = type;
     _rect = rect;
 }
 
 void Finder::detect(QPixmap pixmap)
 {
-    QImage image = pixmap.toImage();
-    cv::Mat img(image.height(),image.width(),CV_8UC4,
-                static_cast<void*>(const_cast<uchar *>(image.constBits())),
-                static_cast<size_t>(image.bytesPerLine()));
-    cv::imshow("bin", img);
+    *_type = NONE;
+    _detectFigure(pixmap) || _detectText(pixmap);
 
-    int hMin = 0;
-    int hMax = 0;
-
-    int sMin = 0;
-    int sMax = 0;
-
-    int vMin = 0;
-    int vMax = 0;
-
-    int chMax = 255;
-
-
-    char hMinName[50];
-    char hMaxName[50];
-
-    char sMinName[50];
-    char sMaxName[50];
-
-    char vMinName[50];
-    char vMaxName[50];
-
-    std::sprintf(hMinName, "H min", hMin);
-    std::sprintf(hMaxName, "H max", hMax);
-
-    std::sprintf(sMinName, "S min", sMin);
-    std::sprintf(sMaxName, "S max", sMax);
-
-    std::sprintf(vMinName, "V min", vMin);
-    std::sprintf(vMaxName, "V max", vMax);
-
-    cv::createTrackbar(hMinName, "bin", &hMin, chMax);
-    cv::createTrackbar(hMaxName, "bin", &hMax, chMax);
-
-    cv::createTrackbar(sMinName, "bin", &sMin, chMax);
-    cv::createTrackbar(sMaxName, "bin", &sMax, chMax);
-
-    cv::createTrackbar(vMinName, "bin", &vMin, chMax);
-    cv::createTrackbar(vMaxName, "bin", &vMax, chMax);
-
-    while (true) {
-        cv::Mat image = img.clone();
-        cv::imshow("bin", image);
-        cv::cvtColor(image, image, CV_BGR2HSV);
-        cv::Scalar lower(hMin, sMin, vMin);
-        cv::Scalar upper(hMax, sMax, vMax);
-        cv::inRange(image, lower, upper, image);
-        cv::imshow("image", image);
-        cv::waitKey(10);
-    }
-//    *_type = NONE;
-//    _detectFigure(pixmap);
-////            || _detectText(pixmap);
-
-//    emit findImage();
+    emit findImage();
 }
 
 bool Finder::_detectFigure(QPixmap pixmap)

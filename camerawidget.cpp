@@ -1,12 +1,13 @@
 #include "camerawidget.hpp"
-#include <QVBoxLayout>
 #include <sceenshot/screenshotwindow.hpp>
 
-CameraWidget::CameraWidget(QWidget *parent) :
+#include <QVBoxLayout>
+
+CameraWidget::CameraWidget(QSettings *settings, QWidget *parent) :
     QWidget(parent),
     _screenBtn(new QPushButton(this)),
     _searchBtn(new QPushButton(this)),
-    _videoWidget(new VideoWidget(this))
+    _videoWidget(new VideoWidget(settings, this))
 {
     _createLayout();
     _initConnections();

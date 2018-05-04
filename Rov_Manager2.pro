@@ -11,8 +11,9 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = Rov_Manager2
 TEMPLATE = app
 
-INCLUDEPATH += $$PWD/ffmpeg/include\
-    $$PWD/OpenCV/include
+INCLUDEPATH += $$PWD/ffmpeg/include \
+    $$PWD/OpenCV/include \
+    $$PWD/Python27/include
 
 LIBS += -L$$PWD/ffmpeg/lib \
     -lavcodec \
@@ -41,7 +42,9 @@ LIBS += -L$$PWD/ffmpeg/lib \
     -lopencv_stitching2413 \
     -lopencv_superres2413 \
     -lopencv_video2413 \
-    -lopencv_videostab2413
+    -lopencv_videostab2413 \
+    -L$$PWD/Python27 \
+    -lpython27
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
 # depend on your compiler). Please consult the documentation of the
@@ -74,7 +77,10 @@ SOURCES += \
     rov_data_types/binary_stream.cpp \
     rov_data_types/crc.cpp \
     rov_data_types/rov_data_types.cpp \
-    rov_data_types/serializable.cpp
+    rov_data_types/serializable.cpp \
+    configwidget.cpp \
+    ctkrangeslider.cpp \
+    clickablelabel.cpp
 
 HEADERS += \
     mainwidget.hpp \
@@ -96,4 +102,7 @@ HEADERS += \
     rov_data_types/crc.hpp \
     rov_data_types/meta.hpp \
     rov_data_types/rov_data_types.hpp \
-    rov_data_types/serializable.hpp
+    rov_data_types/serializable.hpp \
+    configwidget.hpp \
+    ctkrangeslider.hpp \
+    clickablelabel.hpp

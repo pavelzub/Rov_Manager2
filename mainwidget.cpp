@@ -10,22 +10,24 @@
 
 MainWidget::MainWidget(QWidget *parent) :
     QTabWidget(parent),
-    _cameraWidget(new CameraWidget(this)),
+    _settings(new QSettings(".ini", QSettings::IniFormat)),
+    _cameraWidget(new CameraWidget(_settings, this)),
     _calculationWidget(new CalculationWidget(this)),
-    _obsWidget(new ObsWidget(this))
+    _obsWidget(new ObsWidget(this)),
+    _configWidget(new ConfigWidget(_settings, this))
 {
     _createLayout();
     _initConnetions();
-    _initVideoParser();
     _initVideoParser();
 }
 
 void MainWidget::_createLayout()
 {
-    addTab(new CameraWidget(this), "Залепа");
+//    addTab(new CalculationWidget(this), "Залепа");
     addTab(_cameraWidget, "Камера");
-    addTab(_calculationWidget, "Вычисления");
-    addTab(_obsWidget, "Сейсмометр");
+//    addTab(_calculationWidget, "Вычисления");
+//    addTab(_obsWidget, "Сейсмометр");
+//    addTab(_configWidget, "Конфиг");
     setTabEnabled(0, false);
 }
 
@@ -44,6 +46,7 @@ void MainWidget::_initVideoParser()
     connect(thread, &QThread::started, parser, &VideoStreamParser::process);
     connect(parser, &VideoStreamParser::finished, thread, &QThread::quit);
     connect(parser, &VideoStreamParser::repaint, _cameraWidget, &CameraWidget::UpdateCamera);
+    connect(parser, &VideoStreamParser::repaint, _configWidget, &ConfigWidget::UpdateCamera);
     connect(parser, &VideoStreamParser::finished, parser, &VideoStreamParser::deleteLater);
     connect(thread, &QThread::finished, thread, &QThread::deleteLater);
 

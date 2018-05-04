@@ -6,9 +6,9 @@
 #include <QThread>
 #include <iostream>
 
-VideoWidget::VideoWidget(QWidget *parent):
+VideoWidget::VideoWidget(QSettings *settings, QWidget *parent):
     QVideoWidget(parent),
-    _imageDetector(new ImageDetector(this))
+    _imageDetector(new ImageDetector(settings, this))
 {
     setFixedSize(WIDGETWIDTH, WIDGETWIDTH * HEIGHT / WIDTH);
     _initFfmpeg();
