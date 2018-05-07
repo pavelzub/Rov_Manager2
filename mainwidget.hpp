@@ -16,6 +16,9 @@ class MainWidget : public QTabWidget
 public:
     explicit MainWidget(QWidget *parent = nullptr);
 
+protected:
+    bool eventFilter(QObject *obj, QEvent *ev);
+
 private:
     void _createLayout();
     void _initConnetions();

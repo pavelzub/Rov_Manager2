@@ -5,6 +5,7 @@
 #include <QLabel>
 #include <QThread>
 #include <QDoubleValidator>
+#include <QDebug>
 
 #include <video/videostreamparser.hpp>
 
@@ -21,14 +22,20 @@ MainWidget::MainWidget(QWidget *parent) :
     _initVideoParser();
 }
 
+bool MainWidget::eventFilter(QObject *obj, QEvent *ev)
+{
+    if (ev->type() == QEvent::MouseButtonPress)
+        qDebug() << obj->staticQtMetaObject.className();
+}
+
 void MainWidget::_createLayout()
 {
 //    addTab(new CalculationWidget(this), "Залепа");
     addTab(_cameraWidget, "Камера");
-//    addTab(_calculationWidget, "Вычисления");
-//    addTab(_obsWidget, "Сейсмометр");
-//    addTab(_configWidget, "Конфиг");
-    setTabEnabled(0, false);
+    addTab(_calculationWidget, "Вычисления");
+    addTab(_obsWidget, "Сейсмометр");
+    addTab(_configWidget, "Конфиг");
+//    setTabEnabled(0, false);
 }
 
 void MainWidget::_initConnetions()

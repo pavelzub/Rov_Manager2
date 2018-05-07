@@ -7,6 +7,7 @@
 #include <QPushButton>
 #include <QPixmap>
 #include <QSettings>
+#include <QComboBox>
 
 #include "ctkrangeslider.hpp"
 #include "clickablelabel.hpp"
@@ -31,6 +32,7 @@ private:
     QPushButton* _saveBtn;
     ctkRangeSlider* _sliders[3];
     QSettings* _settings;
+    QComboBox* _comboBox;
 };
 
 #endif // CONFIGWIDGET_HPP

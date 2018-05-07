@@ -9,6 +9,7 @@
 #include <QApplication>
 #include <Python.h>
 #include <QDebug>
+#include <QDoubleValidator>
 
 CalculationWidget::CalculationWidget(QWidget *parent) :
     QWidget(parent),
@@ -26,14 +27,6 @@ CalculationWidget::CalculationWidget(QWidget *parent) :
 {
     _createLayouts();
     _initConnections();
-//    Py_Initialize();
-//    PyObject* module = PyImport_Import(PyString_FromString("main"));
-//    PyObject* function = PyObject_GetAttrString(module, "foo");
-//    PyObject* args = PyTuple_Pack(2, PyString_FromString("t"),  PyFloat_FromDouble(2.0));
-//    PyObject* ans = PyObject_CallObject(function, args);
-//    double result = PyFloat_AsDouble(ans);
-//    qDebug() << result;
-//    Py_Finalize();
 }
 
 void CalculationWidget::_createLayouts()
@@ -49,12 +42,20 @@ void CalculationWidget::_createLayouts()
     QVBoxLayout* resultLayout  = new QVBoxLayout;
 
     _startUpSpeed->setValidator(new QDoubleValidator(0, 100000, 400, this));
+    _startUpSpeed->setText("10");
     _startHorSpeed->setValidator(new QDoubleValidator(0, 100000, 400, this));
+    _startHorSpeed->setText("93");
     _fallUpSpeed->setValidator(new QDoubleValidator(0, 100000, 400, this));
+    _fallUpSpeed->setText("6");
     _fallHorSpeed->setValidator(new QDoubleValidator(0, 100000, 400, this));
+    _fallHorSpeed->setText("64");
     _windAngle->setValidator(new QDoubleValidator(0, 100000, 400, this));
+    _windAngle->setText("270");
     _startAngle->setValidator(new QDoubleValidator(0, 100000, 400, this));
+    _startAngle->setText("184");
     _time->setValidator(new QDoubleValidator(0, 100000, 400, this));
+    _time->setText("43");
+    _windSpeed->setText("-(1/270)*t**2+25");
 
     _resultAngle->setFixedHeight(75);
     _resultLen->setFixedHeight(75);
@@ -113,8 +114,6 @@ QLayout *CalculationWidget::_createBlock(QString name, QString firstFieldName, Q
 
 void CalculationWidget::_calculate()
 {
-    QProcess proc;
-
     if (!_startHorSpeed->text().size() || !_startUpSpeed->text().size()
             || !_fallHorSpeed->text().size() || !_fallUpSpeed->text().size()
             || !_startAngle->text().size() || !_windAngle->text().size()
@@ -124,30 +123,24 @@ void CalculationWidget::_calculate()
         return;
     }
 
-    double V1 = _startHorSpeed->text().toDouble();
-    double v1 = _startUpSpeed->text().toDouble();
-    double V2 = _fallHorSpeed->text().toDouble();
-    double v2 = _fallUpSpeed->text().toDouble();
-    double a = _startAngle->text().toDouble() / 180.0 * M_PI;
-    double b = _windAngle->text().toDouble() / 180.0 * M_PI;
-    double t = _time->text().toDouble();
+    double V1 = _startHorSpeed->text().replace(",", ".").toDouble();
+    double v1 = _startUpSpeed->text().replace(",", ".").toDouble();
+    double V2 = _fallHorSpeed->text().replace(",", ".").toDouble();
+    double v2 = _fallUpSpeed->text().replace(",", ".").toDouble();
+    double a = _startAngle->text().replace(",", ".").toDouble() / 180.0 * M_PI;
+    double b = _windAngle->text().replace(",", ".").toDouble() / 180.0 * M_PI;
+    double t = _time->text().replace(",", ".").toDouble();
     QString speed = _windSpeed->text();
 
     double fallTime = t * v1 / v2;
-    QString request = QString("/python/main.py \"print (integrate(%1, (t, 0, %2)))\"").arg(speed, QString::number(fallTime));
-    proc.start("python " + QDir::currentPath() + request);
-    proc.waitForFinished(-1);
-    QString out = proc.readAllStandardOutput();
-    QString err = proc.readAllStandardError();
-    if (err.size() || !out.size()){
-        _resultAngle->setText(QDir::currentPath() + request);
-        _resultLen->clear();
-        QApplication::clipboard()->setText(QDir::currentPath() + request);
+    double wind;
+    if (!_integrate(speed, fallTime, wind)){
+        _resultAngle->setText("Неплохо было бы поставить питон и sympy");
         return;
     }
 
-    double windx = -out.toDouble() * qSin(b);
-    double windy = -out.toDouble() * qCos(b);
+    double windx = -wind * qSin(b);
+    double windy = -wind * qCos(b);
     double startx = V1 * t * qSin(a);
     double starty = V1 * t * qCos(a);
     double fallx = V2 * fallTime * qSin(a);
@@ -157,5 +150,24 @@ void CalculationWidget::_calculate()
 
     _resultAngle->setText("Angle: " + QString::number(res.angle()));
     _resultLen->setText("Length: " + QString::number(res.length()));
+}
+
+bool CalculationWidget::_integrate(QString foo, double b, double &result)
+{
+    try {
+        Py_Initialize();
+        PyObject* module = PyImport_Import(PyString_FromString("main"));
+        if (!module) return false;
+        PyObject* function = PyObject_GetAttrString(module, "foo");
+        if (!function) return false;
+        PyObject* args = PyTuple_Pack(2, PyString_FromString(foo.toStdString().data()),  PyFloat_FromDouble(b));
+        PyObject* ans = PyObject_CallObject(function, args);
+        result = PyFloat_AsDouble(ans);
+        Py_Finalize();
+    } catch (...) {
+        qDebug() << "Python error";
+        return false;
+    }
+    return true;
 }
 

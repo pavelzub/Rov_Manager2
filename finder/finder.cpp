@@ -2,7 +2,7 @@
 #include <QRgb>
 #include <algorithm>
 #include <iostream>
-
+#include <QDebug>
 #define sqr(x) ((x)*(x))
 
 Finder::Finder(QSettings *settings, Type *type, QRect *rect, QObject *parent) : QObject(parent)
@@ -10,6 +10,7 @@ Finder::Finder(QSettings *settings, Type *type, QRect *rect, QObject *parent) : 
     _settings = settings;
     _type = type;
     _rect = rect;
+    _loadSettings();
 }
 
 void Finder::detect(QPixmap pixmap)
@@ -22,65 +23,52 @@ void Finder::detect(QPixmap pixmap)
 
 bool Finder::_detectFigure(QPixmap pixmap)
 {
-    cv::Mat image = _getGrauScaleMat(pixmap.toImage());
     std::vector<std::vector<cv::Point> > contours;
-    cv::imshow("2", image);
-    cv::waitKey(1);
-//    double cannyParams = cv::threshold(image, image, 0, 10, CV_THRESH_BINARY_INV + CV_THRESH_OTSU);
-//    cv::Canny(image, image, cannyParams, cannyParams / 2.0);
-    cv::findContours(image, contours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
-    cv::drawContours(image, contours, 0, cv::Scalar(100,200,255));
-    cv::imshow("1", image);
-    cv::waitKey(1);
+    for (int i = 0; i < 1; i++){
+        cv::Mat mask = _getMask(pixmap, i);
+        double cannyParams = cv::threshold(mask, mask, 0, 10, CV_THRESH_BINARY_INV + CV_THRESH_OTSU);
+        cv::Canny(mask, mask, cannyParams, cannyParams / 2.0);
+        cv::findContours(mask, contours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
+        cv::drawContours(mask, contours, 0, cv::Scalar(100,200,255));
+        cv::imshow("3", mask);
+        cv::waitKey(1);
 
-    for (std::size_t i = 0; i < contours.size(); i++)
-    {
-        if (contours.at(i).size() < 5) continue;
-        if (std::fabs(cv::contourArea(contours.at(i))) < 300.0) continue;
+        for (std::size_t i = 0; i < contours.size(); i++)
+        {
+            if (contours.at(i).size() < 5) continue;
+            if (std::fabs(cv::contourArea(contours.at(i))) < 300.0) continue;
 
-        static std::vector<cv::Point> hull;
-        cv::convexHull(contours.at(i), hull, true);
-        cv::approxPolyDP(hull, hull, 15, true);
-        if (!cv::isContourConvex(hull)) continue;
+            static std::vector<cv::Point> hull;
+            cv::convexHull(contours.at(i), hull, true);
+            cv::approxPolyDP(hull, hull, 15, true);
+            if (!cv::isContourConvex(hull)) continue;
 
-        cv::RotatedRect bEllipse = cv::fitEllipse(contours.at(i));
-        FigureColor color = _getFigureColor(pixmap.toImage().pixel(static_cast<int>(bEllipse.center.x), static_cast<int>(bEllipse.center.y)));
-        if (color == FigureColor::OTHER || hull.size() > 4) continue;
+            cv::RotatedRect bEllipse = cv::fitEllipse(contours.at(i));
+            if (hull.size() > 4) continue;
+            qDebug() << "1";
+//            cv::drawContours(mask, contours.at(i), 0, cv::Scalar(100,200,255));
 
-        QPoint min = {INT_MAX, INT_MAX};
-        QPoint max = {0, 0};
-        for (auto i : hull){
-            min.setX(qMin(min.x(), i.x));
-            min.setY(qMin(min.y(), i.y));
-            max.setX(qMax(max.x(), i.x));
-            max.setY(qMax(max.y(), i.y));
+            QPoint min = {INT_MAX, INT_MAX};
+            QPoint max = {0, 0};
+            for (auto i : hull){
+                min.setX(qMin(min.x(), i.x));
+                min.setY(qMin(min.y(), i.y));
+                max.setX(qMax(max.x(), i.x));
+                max.setY(qMax(max.y(), i.y));
+            }
+            *_rect = QRect(min, max);
+            *_type = static_cast<Type>(1);
+            return true;
         }
-
-        *_rect = QRect(min, max);
-        *_type = static_cast<Type>((hull.size() - 3) * 3 + color);
-        return true;
+//        cv::imshow("2", mask);
+//        cv::waitKey(1);
     }
+
     return false;
 }
 
 bool Finder::_detectText(QPixmap pixmap)
 {
-//    QImage image = pixmap.toImage();
-//    for (int i = 0; i < image.width(); i++)
-//        for (int j = 0; j < image.height(); j++){
-//            QColor color = image.pixel(i, j);
-//            double distance = std::sqrt(sqr(color.green()) +
-//                                        sqr(color.red()) +
-//                                        sqr(color.blue()));
-//            if (distance < 200)
-//                image.setPixel(i, j, qRgb(0, 0, 0));
-//            else
-//                image.setPixel(i, j, qRgb(255, 255, 255));
-//        }
-//    cv::Mat im = _getGrauScaleMat(image);
-//    cv::imshow("test", im);
-//    cv::waitKey(2);
-
     try {
         cv::Mat img_scene = _getGrauScaleMat(pixmap.toImage());
         std::vector<cv::KeyPoint> keypoints_scene;
@@ -94,10 +82,7 @@ bool Finder::_detectText(QPixmap pixmap)
         extractor.compute(img_scene, keypoints_scene, descriptors_scene);
 
         for (int i = 0; i < 6; i++){
-            cv::Mat img_object = cv::imread("C://MATE//Rov_front//" + TEMPLATESPATH[i].toStdString(), CV_LOAD_IMAGE_GRAYSCALE);
-//            cv::Mat img_object = cv::imread(TEMPLATESPATH[i].toStdString(), CV_LOAD_IMAGE_GRAYSCALE);
-
-
+            cv::Mat img_object = cv::imread("templates//" + TEMPLATESPATH[i].toStdString(), CV_LOAD_IMAGE_GRAYSCALE);
 
             std::vector<cv::KeyPoint> keypoints_object;
             detector.detect(img_object, keypoints_object);
@@ -160,18 +145,56 @@ bool Finder::_detectText(QPixmap pixmap)
     return false;
 }
 
-FigureColor Finder::_getFigureColor(QColor color)
+cv::Mat Finder::_getMask(QPixmap pixmap, int index)
 {
-    QColor colors[3] = { QColor(Qt::red), QColor(Qt::yellow), QColor(Qt::blue)};
+    QImage imag = pixmap.copy(pixmap.rect()).toImage();
+    cv::Mat black = cv::Mat::zeros(imag.height(),imag.width(),CV_8UC4);
+    cv::Mat img(imag.height(),imag.width(),CV_8UC4,
+                static_cast<void*>(const_cast<uchar *>(imag.constBits())),
+                static_cast<size_t>(imag.bytesPerLine()));
 
-    for (int i = 0; i < 3; i++){
-        double distance = std::sqrt(sqr(colors[i].green() - color.green()) +
-                                    sqr(colors[i].red() - color.red()) +
-                                    sqr(colors[i].blue() - color.blue()));
-        if (distance < COLORTOLERANCE)
-            return static_cast<FigureColor>(i + 1);
+    int hMin = _colors[index].hMin;
+    int hMax = _colors[index].hMax;
+    int sMin = _colors[index].sMin;
+    int sMax = _colors[index].sMax;
+    int vMin = _colors[index].vMin;
+    int vMax = _colors[index].vMax;
+
+    if (hMin > 180){
+        hMin -= 180;
+        hMax -= 180;
     }
-    return FigureColor::OTHER;
+    cv::Mat image = img.clone();
+    cv::cvtColor(image, image, CV_BGR2HSV);
+    cv::Scalar upper(MIN(hMax, 180), sMax, vMax);
+    cv::Scalar lower(hMin, sMin, vMin);
+    cv::inRange(image, lower, upper, image);
+
+    cv::Mat image1 = img.clone();
+    cv::cvtColor(image1, image1, CV_BGR2HSV);
+    cv::Scalar upper1(MAX(hMax - 180, 0), sMax, vMax);
+    cv::Scalar lower1(0, sMin, vMin);
+    cv::inRange(image1, lower1, upper1, image1);
+
+    image = image + image1;
+    cv::imshow(QString::number(index).toStdString(), image);
+    cv::waitKey(1);
+
+    return image;
+}
+
+void Finder::_loadSettings()
+{
+    for (int i = 0; i < 3; i++){
+        _settings->beginGroup(names[i]);
+        _colors[i].hMax = _settings->value("h_high", 360).toInt();
+        _colors[i].hMin = _settings->value("h_low", 0).toInt();
+        _colors[i].sMax = _settings->value("s_high", 255).toInt();
+        _colors[i].sMin = _settings->value("s_low", 0).toInt();
+        _colors[i].vMax = _settings->value("v_high", 255).toInt();
+        _colors[i].vMin = _settings->value("v_low", 0).toInt();
+        _settings->endGroup();
+    }
 }
 
 float Finder::_getSquare(std::vector<cv::Point2f> poitns)

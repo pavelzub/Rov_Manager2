@@ -4,13 +4,15 @@
 #include "opencv2/nonfree/features2d.hpp"
 #include "opencv2/opencv.hpp"
 #include <QDebug>
+#include <QPainter>
 
 ConfigWidget::ConfigWidget(QSettings *setting, QWidget *parent) :
     QWidget(parent),
     _pixmap(new QPixmap),
     _image(new ClickableLabel(_pixmap, this)),
     _pipetBtn(new QPushButton(this)),
-    _saveBtn(new QPushButton(this))
+    _saveBtn(new QPushButton(this)),
+    _comboBox(new QComboBox(this))
 {
     _settings = setting;
     _createLayout();
@@ -24,7 +26,13 @@ void ConfigWidget::_createLayout()
     QVBoxLayout* menuLauout = new QVBoxLayout;
 
     QString names[3] = {"H", "S", "V"};
-    int vals[3] = {180, 255, 255};
+    int vals[3] = {360, 255, 255};
+
+    _comboBox->addItem("RED");
+    _comboBox->addItem("BLUE");
+    _comboBox->addItem("YELLOW");
+    menuLauout->addWidget(_comboBox);
+
     for (int i = 0; i < 3; i++){
         QHBoxLayout* l = new QHBoxLayout;
         QLabel* name = new QLabel(this);
@@ -40,6 +48,7 @@ void ConfigWidget::_createLayout()
     }
 
     _pipetBtn->setCheckable(true);
+    _pipetBtn->setText("Пипетка");
     menuLauout->addWidget(_pipetBtn);
 
     _saveBtn->setText("Сохранить");
@@ -54,12 +63,13 @@ void ConfigWidget::_initConnections()
 {
     connect(_image, &ClickableLabel::clicked, this, &ConfigWidget::_setIntervals);
     connect(_saveBtn, &QPushButton::clicked, this, &ConfigWidget::_saveConfig);
+    connect(_comboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), [this](int){_loadSettings();});
 }
 
 void ConfigWidget::_loadSettings()
 {
-    _settings->beginGroup("VIDEO");
-    _sliders[0]->setMaximumValue(_settings->value("h_high", 180).toInt());
+    _settings->beginGroup(_comboBox->currentText());
+    _sliders[0]->setMaximumValue(_settings->value("h_high", 360).toInt());
     _sliders[0]->setMinimumValue(_settings->value("h_low", 0).toInt());
     _sliders[1]->setMaximumValue(_settings->value("s_high", 255).toInt());
     _sliders[1]->setMinimumValue(_settings->value("s_low", 0).toInt());
@@ -70,13 +80,13 @@ void ConfigWidget::_loadSettings()
 
 void ConfigWidget::_saveConfig()
 {
-    _settings->beginGroup("VIDEO");
+    _settings->beginGroup(_comboBox->currentText());
     _settings->setValue("h_high", _sliders[0]->maximumValue());
     _settings->setValue("h_low", _sliders[0]->minimumValue());
     _settings->setValue("s_high", _sliders[1]->maximumValue());
     _settings->setValue("s_low", _sliders[1]->minimumValue());
-    _settings->setValue("w_high", _sliders[2]->maximumValue());
-    _settings->setValue("w_low", _sliders[2]->minimumValue());
+    _settings->setValue("v_high", _sliders[2]->maximumValue());
+    _settings->setValue("v_low", _sliders[2]->minimumValue());
     _settings->endGroup();
 }
 
@@ -84,6 +94,7 @@ void ConfigWidget::_setIntervals(int h, int s, int v)
 {
     if (!_pipetBtn->isChecked()) return;
     _pipetBtn->setChecked(false);
+    if (h < 25) h += 180;
     _sliders[0]->setMinimumValue(MAX(h - 25, 0));
     _sliders[0]->setMaximumValue(MIN(h + 25, 180));
     _sliders[1]->setMinimumValue(MAX(s - 25, 0));
@@ -108,14 +119,29 @@ void ConfigWidget::UpdateCamera(QPixmap pixmap)
     int vMin = _sliders[2]->minimumValue();
     int vMax = _sliders[2]->maximumValue();
 
+    if (hMin > 180){
+        hMin -= 180;
+        hMax -= 180;
+    }
     cv::Mat image = img.clone();
     cv::cvtColor(image, image, CV_BGR2HSV);
+    cv::Scalar upper(MIN(hMax, 180), sMax, vMax);
     cv::Scalar lower(hMin, sMin, vMin);
-    cv::Scalar upper(hMax, sMax, vMax);
     cv::inRange(image, lower, upper, image);
+
+    cv::Mat image1 = img.clone();
+    cv::cvtColor(image1, image1, CV_BGR2HSV);
+    cv::Scalar upper1(MAX(hMax - 180, 0), sMax, vMax);
+    cv::Scalar lower1(0, sMin, vMin);
+    cv::inRange(image1, lower1, upper1, image1);
+
+    image = image + image1;
     cv::subtract(black, img, img, 255 - image);
 
     cv::cvtColor(img, img, CV_BGR2RGB);
+//    cv::imshow("test", img);
+//    cv::waitKey(1);
     QImage dest((uchar*) img.data, img.cols, img.rows, img.step, QImage::Format_RGB888);
     _image->setPixmap(QPixmap::fromImage(dest));
+//    _image->setPixmap(*_pixmap);
 }

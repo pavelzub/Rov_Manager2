@@ -46,14 +46,14 @@ void VideoStreamParser::process()
 //          avcodec_decode_video2(_mVideoDecodeContext, mFrame, &got_frame, &pkt);
 
 //          QPixmap pixmap = frameToQPixmap(mFrame, _mVideoDecodeContext);
-//          std::cout << "stream: " << pixmap.width() << "x" << pixmap.height() << std::endl;
+////          std::cout << "stream: " << pixmap.width() << "x" << pixmap.height() << std::endl;
 //          emit repaint(pixmap);
 
 //          av_free_packet(&pkt);
 //        }
 //    }
 //    av_frame_free(&mFrame);
-//    emit(finished());
+    emit(finished());
 }
 
 QPixmap VideoStreamParser::frameToQPixmap(AVFrame* src_frame, AVCodecContext* dec)

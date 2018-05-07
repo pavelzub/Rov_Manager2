@@ -21,6 +21,7 @@ private:
     void _initConnections();
     QLayout* _createBlock(QString name, QString firstFieldName, QWidget* firstFieldVal, QString secondFieldName, QWidget* secondFieldVal);
     void _calculate();
+    bool _integrate(QString foo, double b, double &result);
 
     QLineEdit* _startUpSpeed;
     QLineEdit* _startHorSpeed;

@@ -9,8 +9,8 @@ enum Type {NONE, REDTRIANGLE, YELLOWTRIANGLE, BLUETRIANGLE, REDRECT, YELLOWRECT,
 enum FigureColor {OTHER, RED, YELLOW, BLUE};
 const QString FIGURENAMES[6] = {"A", "B", "C",
                                 "D", "E", "F"};
-const QString TEMPLATESPATH[6] = {"templates//1.jpg", "templates//2.jpg", "templates//3.jpg",
-                                   "templates//4.jpg", "templates//5.jpg", "templates//6.jpg"};
+const QString TEMPLATESPATH[6] = {"1.jpg", "2.jpg", "3.jpg",
+                                   "4.jpg", "5.jpg", "6.jpg"};
 
 class ImageDetector : public QObject
 {
