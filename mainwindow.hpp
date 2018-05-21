@@ -15,11 +15,7 @@ public:
     ~MainWindow();
 
 private:
-    void _createMenu();
-    void _initConnections();
-
     MainWidget* _mainwidget;
-    CalculationWidget* _calculationWindow;
 };
 
 #endif // MAINWINDOW_HPP

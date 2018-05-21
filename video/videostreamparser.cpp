@@ -13,46 +13,46 @@ VideoStreamParser::VideoStreamParser(QString url, QObject *parent) :
 
 void VideoStreamParser::process()
 {
-       QPixmap test("testImage\\2.jpg");
+//       QPixmap test("testImage\\2.jpg");
 
-       for (;;){
-           emit repaint(test);
-           QThread::msleep(20);
-       }
-//    while(!_init()){
-//        std::cout << "Init error: " << _url.toStdString()  << std::endl;
-//    }
+//       for (;;){
+//           emit repaint(test);
+//           QThread::msleep(20);
+//       }
+    while(!_init()){
+        std::cout << "Init error: " << _url.toStdString()  << std::endl;
+    }
 
-//    auto mFrame = av_frame_alloc();
+    auto mFrame = av_frame_alloc();
 
-//    for(;;){
-//        static std::queue<std::pair<int64_t, double> > ptsDb;
+    for(;;){
+        static std::queue<std::pair<int64_t, double> > ptsDb;
 
-//        AVPacket pkt;
-//        av_init_packet(&pkt);
-//        pkt.data = nullptr;
-//        pkt.size = 0;
+        AVPacket pkt;
+        av_init_packet(&pkt);
+        pkt.data = nullptr;
+        pkt.size = 0;
 
-//        if (av_read_frame(_mFormatContext, &pkt) < 0){
-//            std::cout << "Frame error" << std::endl;
-//            break;
-//        }
+        if (av_read_frame(_mFormatContext, &pkt) < 0){
+            std::cout << "Frame error" << std::endl;
+            break;
+        }
 
-//        double tRecv = QDateTime::currentMSecsSinceEpoch();
-//        if (pkt.stream_index == _mVideoStreamIdx)
-//        {
-//          int got_frame = 0;
+        double tRecv = QDateTime::currentMSecsSinceEpoch();
+        if (pkt.stream_index == _mVideoStreamIdx)
+        {
+          int got_frame = 0;
 
-//          avcodec_decode_video2(_mVideoDecodeContext, mFrame, &got_frame, &pkt);
+          avcodec_decode_video2(_mVideoDecodeContext, mFrame, &got_frame, &pkt);
 
-//          QPixmap pixmap = frameToQPixmap(mFrame, _mVideoDecodeContext);
-////          std::cout << "stream: " << pixmap.width() << "x" << pixmap.height() << std::endl;
-//          emit repaint(pixmap);
+          QPixmap pixmap = frameToQPixmap(mFrame, _mVideoDecodeContext);
+//          std::cout << "stream: " << pixmap.width() << "x" << pixmap.height() << std::endl;
+          emit repaint(pixmap);
 
-//          av_free_packet(&pkt);
-//        }
-//    }
-//    av_frame_free(&mFrame);
+          av_free_packet(&pkt);
+        }
+    }
+    av_frame_free(&mFrame);
     emit(finished());
 }
 

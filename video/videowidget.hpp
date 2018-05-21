@@ -24,8 +24,8 @@ protected:
 private:
     void _initFfmpeg();
 
-    const int WIDTH = 16;
-    const int HEIGHT = 9;
+    const int WIDTH = 4;
+    const int HEIGHT = 3;
     const int WIDGETWIDTH = 700;
     bool _searching = false;
     ImageDetector* _imageDetector;

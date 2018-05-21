@@ -16,7 +16,7 @@ Finder::Finder(QSettings *settings, Type *type, QRect *rect, QObject *parent) : 
 void Finder::detect(QPixmap pixmap)
 {
     *_type = NONE;
-    _detectFigure(pixmap) || _detectText(pixmap);
+    _detectText(pixmap) || _detectFigure(pixmap);
 
     emit findImage();
 }
@@ -26,17 +26,18 @@ bool Finder::_detectFigure(QPixmap pixmap)
     std::vector<std::vector<cv::Point> > contours;
     for (int i = 0; i < 1; i++){
         cv::Mat mask = _getMask(pixmap, i);
-        double cannyParams = cv::threshold(mask, mask, 0, 10, CV_THRESH_BINARY_INV + CV_THRESH_OTSU);
-        cv::Canny(mask, mask, cannyParams, cannyParams / 2.0);
+//        double cannyParams = cv::threshold(mask, mask, 0, 10, CV_THRESH_BINARY_INV + CV_THRESH_OTSU);
+//        cv::Canny(mask, mask, cannyParams, cannyParams / 2.0);
         cv::findContours(mask, contours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
-        cv::drawContours(mask, contours, 0, cv::Scalar(100,200,255));
-        cv::imshow("3", mask);
+        cv::Mat black = cv::Mat::zeros(mask.rows, mask.cols, mask.type());
+        cv::drawContours(black, contours, -1, cv::Scalar(100,200,255));
+        cv::imshow("3", black);
         cv::waitKey(1);
 
         for (std::size_t i = 0; i < contours.size(); i++)
         {
             if (contours.at(i).size() < 5) continue;
-            if (std::fabs(cv::contourArea(contours.at(i))) < 300.0) continue;
+            if (std::fabs(cv::contourArea(contours.at(i))) < 1200.0) continue;
 
             static std::vector<cv::Point> hull;
             cv::convexHull(contours.at(i), hull, true);

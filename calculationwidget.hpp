@@ -31,6 +31,7 @@ private:
     QLineEdit* _windAngle;
     QLineEdit* _startAngle;
     QLineEdit* _time;
+    QLineEdit* _size;
     QPushButton* _calculateBtn;
     QLabel* _resultAngle;
     QLabel* _resultLen;

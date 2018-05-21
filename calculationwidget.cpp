@@ -13,17 +13,7 @@
 
 CalculationWidget::CalculationWidget(QWidget *parent) :
     QWidget(parent),
-    _startUpSpeed(new QLineEdit(this)),
-    _startHorSpeed(new QLineEdit(this)),
-    _fallUpSpeed(new QLineEdit(this)),
-    _fallHorSpeed(new QLineEdit(this)),
-    _windSpeed(new QLineEdit(this)),
-    _windAngle(new QLineEdit(this)),
-    _startAngle(new QLineEdit(this)),
-    _time(new QLineEdit(this)),
-    _calculateBtn(new QPushButton(this)),
-    _resultAngle(new QLabel(this)),
-    _resultLen(new QLabel(this))
+    _calculateBtn(new QPushButton(this))
 {
     _createLayouts();
     _initConnections();
@@ -31,54 +21,47 @@ CalculationWidget::CalculationWidget(QWidget *parent) :
 
 void CalculationWidget::_createLayouts()
 {
-    QVBoxLayout* mainLayout = new QVBoxLayout;
-    QHBoxLayout* Layout_1 = new QHBoxLayout;
-    QHBoxLayout* Layout_2 = new QHBoxLayout;
-    QHBoxLayout* Layout_3 = new QHBoxLayout;
-    QLayout* startLayout = _createBlock("Взлет", "Вертикальная скорость", _startUpSpeed, "Горизонтальная скорость", _startHorSpeed);
-    QLayout* fallLayout = _createBlock("Падение", "Вертикальная скорость", _fallUpSpeed, "Горизонтальная скорость", _fallHorSpeed);
-    QLayout* initLayout = _createBlock("Данные старта", "Угол", _startAngle, "Время", _time);
-    QLayout* windLayout = _createBlock("Ветер", "Угол", _windAngle, "Уравнение скорости", _windSpeed);
-    QVBoxLayout* resultLayout  = new QVBoxLayout;
+    QVBoxLayout* mainLayout = new QVBoxLayout(this);
+    QHBoxLayout* HLayout = new QHBoxLayout();
+    QHBoxLayout* ResLayout = new QHBoxLayout();
+    QVBoxLayout* nameLayout = new QVBoxLayout;
+    QVBoxLayout* valLayout = new QVBoxLayout;
 
-    _startUpSpeed->setValidator(new QDoubleValidator(0, 100000, 400, this));
-    _startUpSpeed->setText("10");
-    _startHorSpeed->setValidator(new QDoubleValidator(0, 100000, 400, this));
-    _startHorSpeed->setText("93");
-    _fallUpSpeed->setValidator(new QDoubleValidator(0, 100000, 400, this));
-    _fallUpSpeed->setText("6");
-    _fallHorSpeed->setValidator(new QDoubleValidator(0, 100000, 400, this));
-    _fallHorSpeed->setText("64");
-    _windAngle->setValidator(new QDoubleValidator(0, 100000, 400, this));
-    _windAngle->setText("270");
-    _startAngle->setValidator(new QDoubleValidator(0, 100000, 400, this));
-    _startAngle->setText("184");
-    _time->setValidator(new QDoubleValidator(0, 100000, 400, this));
-    _time->setText("43");
-    _windSpeed->setText("-(1/270)*t**2+25");
+    auto addWidget = [this, nameLayout, valLayout](QString name, QLineEdit*& widget, bool valid, QString def){
+        QLabel* l = new QLabel(this);
+        l->setText(name);
+        nameLayout->addWidget(l);
 
-    _resultAngle->setFixedHeight(75);
-    _resultLen->setFixedHeight(75);
+        widget = new QLineEdit(this);
+        widget->setText(def);
+        if (valid) widget->setValidator(new QDoubleValidator(0, 100000, 400, this));
+        valLayout->addWidget(widget);
+    };
+
+    addWidget("Heading:", _startAngle, true, "182");
+    addWidget("Airspeed ascent:", _startHorSpeed, true, "138");
+    addWidget("Ascent rate:", _startUpSpeed, true, "11,3");
+    addWidget("Time until engine failure:", _time, true, "29");
+    addWidget("Airspeed descent:", _fallHorSpeed, true, "98");
+    addWidget("Descent rate:", _fallUpSpeed, true, "7,8");
+    addWidget("Wind direction:", _windAngle, true, "248");
+    addWidget("Wind speed:", _windSpeed, false, "17,2");
+    addWidget("Маштаб:", _size, true, "1428");
+//    _windSpeed->setText("-(1/270)*t**2+25");
+
+    _resultAngle = new QLabel(this);
+    _resultLen = new QLabel(this);
+    _resultAngle->setFixedHeight(20);
+    _resultLen->setFixedHeight(20);
     _calculateBtn->setText("Расчитать");
-    _resultLen->setStyleSheet("font: 18pt;");
-    _resultAngle->setStyleSheet("font: 18pt;");
 
-
-    _calculateBtn->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
-    _resultAngle->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed);
-    _resultLen->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed);
-
-    Layout_1->addLayout(startLayout);
-    Layout_1->addLayout(fallLayout);
-    Layout_2->addLayout(windLayout);
-    Layout_2->addLayout(initLayout);
-    resultLayout->addWidget(_resultAngle);
-    resultLayout->addWidget(_resultLen);
-    Layout_3->addWidget(_calculateBtn);
-    Layout_3->addLayout(resultLayout);
-    mainLayout->addLayout(Layout_1);
-    mainLayout->addLayout(Layout_2);
-    mainLayout->addLayout(Layout_3);
+    ResLayout->addWidget(_resultAngle);
+    ResLayout->addWidget(_resultLen);
+    HLayout->addLayout(nameLayout);
+    HLayout->addLayout(valLayout);
+    mainLayout->addLayout(HLayout);
+    mainLayout->addLayout(ResLayout);
+    mainLayout->addWidget(_calculateBtn);
     setLayout(mainLayout);
 }
 
@@ -87,50 +70,26 @@ void CalculationWidget::_initConnections()
     connect(_calculateBtn, &QPushButton::released, this, &CalculationWidget::_calculate);
 }
 
-QLayout *CalculationWidget::_createBlock(QString name, QString firstFieldName, QWidget *firstFieldVal, QString secondFieldName, QWidget *secondFieldVal)
-{
-    QVBoxLayout* Layout = new QVBoxLayout;
-    QLabel* Name = new QLabel;
-    QLabel* Lable_1 = new QLabel;
-    QLabel* Lable_2 = new QLabel;
-    Name->setAlignment(Qt::AlignHCenter);
-    Name->setStyleSheet("font: 18pt;");
-    Name->setText(name);
-    Lable_1->setText(firstFieldName);
-    Lable_2->setText(secondFieldName);
-    QHBoxLayout* Layout_1 = new QHBoxLayout;
-    QHBoxLayout* Layout_2 = new QHBoxLayout;
-
-    Layout->addWidget(Name);
-    Layout->addLayout(Layout_1);
-    Layout->addLayout(Layout_2);
-    Layout_1->addWidget(Lable_1);
-    Layout_1->addWidget(firstFieldVal);
-    Layout_2->addWidget(Lable_2);
-    Layout_2->addWidget(secondFieldVal);
-
-    return Layout;
-}
-
 void CalculationWidget::_calculate()
 {
     if (!_startHorSpeed->text().size() || !_startUpSpeed->text().size()
             || !_fallHorSpeed->text().size() || !_fallUpSpeed->text().size()
             || !_startAngle->text().size() || !_windAngle->text().size()
-            || !_time->text().size() || !_windSpeed->text().size()){
-        _resultAngle->setText("Не все поля заполнены");
-        _resultLen->clear();
+            || !_time->text().size() || !_windSpeed->text().size()
+            || !_size->text().size()){
+        _calculateBtn->setStyleSheet("background-color: red");
         return;
     }
-
+    _calculateBtn->setStyleSheet("background-color: none");
     double V1 = _startHorSpeed->text().replace(",", ".").toDouble();
     double v1 = _startUpSpeed->text().replace(",", ".").toDouble();
     double V2 = _fallHorSpeed->text().replace(",", ".").toDouble();
     double v2 = _fallUpSpeed->text().replace(",", ".").toDouble();
-    double a = _startAngle->text().replace(",", ".").toDouble() / 180.0 * M_PI;
-    double b = _windAngle->text().replace(",", ".").toDouble() / 180.0 * M_PI;
+    double a = _startAngle->text().replace(",", ".").toDouble();
+    double b = _windAngle->text().replace(",", ".").toDouble();
     double t = _time->text().replace(",", ".").toDouble();
-    QString speed = _windSpeed->text();
+    double m = _size->text().replace(",", ".").toDouble();
+    QString speed = _windSpeed->text().replace(",", ".");
 
     double fallTime = t * v1 / v2;
     double wind;
@@ -139,17 +98,24 @@ void CalculationWidget::_calculate()
         return;
     }
 
-    double windx = -wind * qSin(b);
-    double windy = -wind * qCos(b);
+    a = a / 180.0 * M_PI;
+    b += b < 180 ? 180 : 0;
+    b = (b - 180.0) / 180.0 * M_PI;
+    double windx = wind * qSin(b);
+    double windy = wind * qCos(b);
     double startx = V1 * t * qSin(a);
     double starty = V1 * t * qCos(a);
     double fallx = V2 * fallTime * qSin(a);
     double fally = V2 * fallTime * qCos(a);
 
     QLineF res(0, 0, windx + startx + fallx, windy + starty + fally);
+    QLineF w(0, 0, windx, windy);
+    QLineF q(0, 0, startx + fallx, starty + fally);
 
+    qDebug() << "Wind len: " << w.length() << " angle:" << w.angle();
+    qDebug() << "Len len: " << q.length() << " angle:" << q.angle();
     _resultAngle->setText("Angle: " + QString::number(res.angle()));
-    _resultLen->setText("Length: " + QString::number(res.length()));
+    _resultLen->setText("Length: " + QString::number(res.length() / m));
 }
 
 bool CalculationWidget::_integrate(QString foo, double b, double &result)
