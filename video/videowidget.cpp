@@ -1,17 +1,15 @@
 #include "videowidget.hpp"
-#include "videostreamparser.hpp"
 
 #include <QApplication>
 #include <QMouseEvent>
 #include <QThread>
 #include <iostream>
 
-VideoWidget::VideoWidget(QSettings *settings, QWidget *parent):
+VideoWidget::VideoWidget(Settings *settings, QWidget *parent):
     QVideoWidget(parent),
     _imageDetector(new ImageDetector(settings, this))
 {
     setFixedSize(WIDGETWIDTH, WIDGETWIDTH * HEIGHT / WIDTH);
-    _initFfmpeg();
 }
 
 void VideoWidget::StartStopRecognition(bool f)
@@ -42,13 +40,6 @@ void VideoWidget::paintEvent(QPaintEvent *event)
 
     painter.end();
     return;
-}
-
-void VideoWidget::_initFfmpeg()
-{
-    av_register_all();
-    avformat_network_init();
-    avcodec_register_all();
 }
 
 void VideoWidget::Update(QPixmap pixmap)

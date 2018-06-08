@@ -2,8 +2,8 @@
 #define FINDER_HPP
 
 #include <QObject>
-#include <QSettings>
 
+#include "settings.hpp"
 #include "imagedetector.hpp"
 #include "opencv2/core/core.hpp"
 #include "opencv2/nonfree/features2d.hpp"
@@ -13,10 +13,10 @@ class Finder : public QObject
 {
     Q_OBJECT
 public:
-    explicit Finder(QSettings* settings, Type* type, QRect* rect, QObject *parent = nullptr);
+    explicit Finder(Settings* settings, QObject *parent = nullptr);
 
 signals:
-    void findImage();
+    void findImage(FigureType type, QRect rect);
 
 public slots:
     void detect(QPixmap pixmap);
@@ -30,19 +30,25 @@ private:
     struct Color{
         int hMax, hMin, sMax, sMin, vMax, vMin;
     };
+
     bool _detectFigure(QPixmap pixmap);
     bool _detectText(QPixmap pixmap);
-    cv::Mat _getMask(QPixmap pixmap, int index);
+    void _loadDescriptors();
     void _loadSettings();
-    FigureColor _getFigureColor(QColor color);
+    void _initConnections();
     float _getSquare(std::vector<cv::Point2f> poitns);
+    FigureColor _getFigureColor(QColor color);
     QRect _getRect(std::vector<cv::Point2f> poitns);
+    cv::Mat _getMask(QPixmap pixmap, int index);
     cv::Mat _getGrauScaleMat(QImage image);
 
-    Type* _type;
-    QRect* _rect;
-    QSettings* _settings;
+    FigureType _type;
+    QRect _rect;
+    Settings* _settings;
     Color _colors[3];
+    cv::Mat _descriptors[6];
+    std::vector<cv::KeyPoint> _keypoints[6];
+    cv::Mat _img_objects[6];
 };
 
 #endif // FINDER_HPP

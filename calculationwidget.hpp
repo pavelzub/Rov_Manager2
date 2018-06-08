@@ -10,6 +10,8 @@
 #include <QString>
 #include <QLabel>
 
+#include "map.hpp"
+
 class CalculationWidget : public QWidget
 {
     Q_OBJECT
@@ -35,6 +37,8 @@ private:
     QPushButton* _calculateBtn;
     QLabel* _resultAngle;
     QLabel* _resultLen;
+    QLine _resultLine;
+    Map* _map;
 
 };
 

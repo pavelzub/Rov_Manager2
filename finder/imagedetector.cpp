@@ -4,10 +4,11 @@
 #include <iostream>
 #include <QThread>
 
-ImageDetector::ImageDetector(QSettings *settings, QObject *parent) : QObject(parent)
+ImageDetector::ImageDetector(Settings *settings, QObject *parent) : QObject(parent)
 {
     _settings = settings;
     _createThread();
+    qRegisterMetaType<FigureType>("FigureType");
 }
 
 void ImageDetector::detectImage(QPixmap pixmap)
@@ -34,22 +35,22 @@ QRect ImageDetector::getRect()
     return _rect;
 }
 
-Type ImageDetector::getType()
+FigureType ImageDetector::getType()
 {
     return _type;
 }
 
-void ImageDetector::_stopDetection()
+void ImageDetector::_stopDetection(FigureType type, QRect rect)
 {
     _isWorking = false;
-    _type = _newType;
-    _rect = _newRect;
+    _type = type;
+    _rect = rect;
 }
 
 void ImageDetector::_createThread()
 {
     QThread* thread = new QThread;
-    Finder* finder = new Finder(_settings, &_newType, &_newRect);
+    Finder* finder = new Finder(_settings);
 
     finder->moveToThread(thread);
     connect(finder, &Finder::findImage, this, &ImageDetector::_stopDetection);

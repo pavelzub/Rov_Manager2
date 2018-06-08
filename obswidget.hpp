@@ -10,7 +10,7 @@ class ObsWidget : public QWidget
     Q_OBJECT
 public:
     explicit ObsWidget(QWidget *parent = nullptr);
-    void buildPlot();
+    void buildPlot(QVector<double> data);
 
 private:
     void _createLayout();

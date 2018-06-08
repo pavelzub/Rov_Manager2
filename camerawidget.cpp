@@ -3,7 +3,7 @@
 
 #include <QVBoxLayout>
 
-CameraWidget::CameraWidget(QSettings *settings, QWidget *parent) :
+CameraWidget::CameraWidget(Settings *settings, QWidget *parent) :
     QWidget(parent),
     _screenBtn(new QPushButton(this)),
     _searchBtn(new QPushButton(this)),

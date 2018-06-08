@@ -3,9 +3,10 @@
 
 #include <QObject>
 #include <QBitmap>
-#include <QSettings>
 
-enum Type {NONE, REDTRIANGLE, YELLOWTRIANGLE, BLUETRIANGLE, REDRECT, YELLOWRECT, BLUERECT};
+#include "settings.hpp"
+
+enum FigureType {NONE, REDTRIANGLE, YELLOWTRIANGLE, BLUETRIANGLE, REDRECT, YELLOWRECT, BLUERECT};
 enum FigureColor {OTHER, RED, YELLOW, BLUE};
 const QString FIGURENAMES[6] = {"A", "B", "C",
                                 "D", "E", "F"};
@@ -16,28 +17,27 @@ class ImageDetector : public QObject
 {
     Q_OBJECT
 public:
-    explicit ImageDetector(QSettings* settings, QObject *parent = nullptr);
+    explicit ImageDetector(Settings* settings, QObject *parent = nullptr);
     void detectImage(QPixmap pixmap);
     bool figureIsFound();
     bool isWorking();
     QRect getRect();
-    Type getType();
+    FigureType getType();
+    void UpdateSettings();
 
 signals:
     void detect(QPixmap);
 
 private slots:
-    void _stopDetection();
+    void _stopDetection(FigureType type, QRect rect);
 
 private:
     void _createThread();
 
     bool _isWorking = false;
-    Type _type = NONE;
-    Type _newType;
+    FigureType _type = NONE;
     QRect _rect;
-    QRect _newRect;
-    QSettings* _settings;
+    Settings* _settings;
 };
 
 #endif // IMAGEDETECTOR_HPP

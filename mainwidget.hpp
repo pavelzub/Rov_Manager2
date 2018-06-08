@@ -3,12 +3,14 @@
 
 #include <QWidget>
 #include <QTabWidget>
-#include <QSettings>
 
 #include "camerawidget.hpp"
 #include "calculationwidget.hpp"
 #include "obswidget.hpp"
 #include "configwidget.hpp"
+#include "settings.hpp"
+#include "obsconfigwidget.hpp"
+#include "moshnyiwidget.hpp"
 
 class MainWidget : public QTabWidget
 {
@@ -16,20 +18,19 @@ class MainWidget : public QTabWidget
 public:
     explicit MainWidget(QWidget *parent = nullptr);
 
-protected:
-    bool eventFilter(QObject *obj, QEvent *ev);
-
 private:
     void _createLayout();
     void _initConnetions();
     void _initVideoParser();
 
-    const QString URL = "udp://192.168.1.255:1234";
-    QSettings* _settings;
+    const QString URL = "192.168.1.65:3090";
+    Settings* _settings;
     CameraWidget* _cameraWidget;
     CalculationWidget* _calculationWidget;
     ObsWidget* _obsWidget;
     ConfigWidget* _configWidget;
+    ObsConfigWidget* _obsConfigWidget;
+    MoshnyiWidget* _moshnyiWidget;
 };
 
 #endif // MAINWIDGET_HPP

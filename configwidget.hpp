@@ -6,9 +6,9 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QPixmap>
-#include <QSettings>
 #include <QComboBox>
 
+#include "settings.hpp"
 #include "ctkrangeslider.hpp"
 #include "clickablelabel.hpp"
 
@@ -16,7 +16,7 @@ class ConfigWidget : public QWidget
 {
     Q_OBJECT
 public:
-    explicit ConfigWidget(QSettings* setting, QWidget *parent = nullptr);
+    explicit ConfigWidget(Settings* setting, QWidget *parent = nullptr);
     void UpdateCamera(QPixmap pixmap);
 
 private:
@@ -31,7 +31,7 @@ private:
     QPushButton* _pipetBtn;
     QPushButton* _saveBtn;
     ctkRangeSlider* _sliders[3];
-    QSettings* _settings;
+    Settings* _settings;
     QComboBox* _comboBox;
 };
 

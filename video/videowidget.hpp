@@ -5,15 +5,15 @@
 #include <QVideoWidget>
 #include <QPainter>
 #include <QString>
-#include <QSettings>
 
 #include "finder/imagedetector.hpp"
+#include "settings.hpp"
 
 class VideoWidget : public QVideoWidget
 {
     Q_OBJECT
 public:
-    VideoWidget(QSettings* settings, QWidget *parent = nullptr);
+    VideoWidget(Settings* settings, QWidget *parent = nullptr);
     void StartStopRecognition(bool f);
     void Update(QPixmap pixmap);
     QPixmap GetPixmap();
@@ -22,8 +22,6 @@ protected:
     void paintEvent(QPaintEvent *event) override;
 
 private:
-    void _initFfmpeg();
-
     const int WIDTH = 4;
     const int HEIGHT = 3;
     const int WIDGETWIDTH = 700;

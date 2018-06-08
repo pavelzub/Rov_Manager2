@@ -6,7 +6,7 @@
 #include <QDebug>
 #include <QPainter>
 
-ConfigWidget::ConfigWidget(QSettings *setting, QWidget *parent) :
+ConfigWidget::ConfigWidget(Settings *setting, QWidget *parent) :
     QWidget(parent),
     _pixmap(new QPixmap),
     _image(new ClickableLabel(_pixmap, this)),
@@ -88,6 +88,7 @@ void ConfigWidget::_saveConfig()
     _settings->setValue("v_high", _sliders[2]->maximumValue());
     _settings->setValue("v_low", _sliders[2]->minimumValue());
     _settings->endGroup();
+    _settings->informUpdate();
 }
 
 void ConfigWidget::_setIntervals(int h, int s, int v)

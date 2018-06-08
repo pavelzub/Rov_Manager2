@@ -5,67 +5,62 @@
 #include <QDebug>
 #define sqr(x) ((x)*(x))
 
-Finder::Finder(QSettings *settings, Type *type, QRect *rect, QObject *parent) : QObject(parent)
+Finder::Finder(Settings *settings, QObject *parent) : QObject(parent)
 {
     _settings = settings;
-    _type = type;
-    _rect = rect;
     _loadSettings();
+    _loadDescriptors();
+    _initConnections();
 }
 
 void Finder::detect(QPixmap pixmap)
 {
-    *_type = NONE;
+    _type = NONE;
     _detectText(pixmap) || _detectFigure(pixmap);
 
-    emit findImage();
+    emit findImage(_type, _rect);
 }
 
 bool Finder::_detectFigure(QPixmap pixmap)
 {
     std::vector<std::vector<cv::Point> > contours;
-    for (int i = 0; i < 1; i++){
-        cv::Mat mask = _getMask(pixmap, i);
-//        double cannyParams = cv::threshold(mask, mask, 0, 10, CV_THRESH_BINARY_INV + CV_THRESH_OTSU);
-//        cv::Canny(mask, mask, cannyParams, cannyParams / 2.0);
+    for (int j = 0; j < 3; j++){
+        float squere = 0;
+        cv::Mat mask = _getMask(pixmap, j);
+        qDebug() << 1;
         cv::findContours(mask, contours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
-        cv::Mat black = cv::Mat::zeros(mask.rows, mask.cols, mask.type());
-        cv::drawContours(black, contours, -1, cv::Scalar(100,200,255));
-        cv::imshow("3", black);
-        cv::waitKey(1);
-
+        qDebug() << 2;
         for (std::size_t i = 0; i < contours.size(); i++)
         {
             if (contours.at(i).size() < 5) continue;
             if (std::fabs(cv::contourArea(contours.at(i))) < 1200.0) continue;
 
-            static std::vector<cv::Point> hull;
+            static std::vector<cv::Point2f> hull;
             cv::convexHull(contours.at(i), hull, true);
             cv::approxPolyDP(hull, hull, 15, true);
             if (!cv::isContourConvex(hull)) continue;
-
             cv::RotatedRect bEllipse = cv::fitEllipse(contours.at(i));
             if (hull.size() > 4) continue;
-            qDebug() << "1";
-//            cv::drawContours(mask, contours.at(i), 0, cv::Scalar(100,200,255));
 
+            float tmp = _getSquare(hull);
+            if (tmp < squere) break;
+
+            squere = tmp;
             QPoint min = {INT_MAX, INT_MAX};
             QPoint max = {0, 0};
             for (auto i : hull){
-                min.setX(qMin(min.x(), i.x));
-                min.setY(qMin(min.y(), i.y));
-                max.setX(qMax(max.x(), i.x));
-                max.setY(qMax(max.y(), i.y));
+                min.setX(qMin(min.x(), static_cast<int>(i.x)));
+                min.setY(qMin(min.y(), static_cast<int>(i.y)));
+                max.setX(qMax(max.x(), static_cast<int>(i.x)));
+                max.setY(qMax(max.y(), static_cast<int>(i.y)));
             }
-            *_rect = QRect(min, max);
-            *_type = static_cast<Type>(1);
-            return true;
+            _rect = QRect(min, max);
+//            qDebug() << 1 + (hull.size() - 3) * 3 + j;
+            _type = static_cast<FigureType>(1 + (hull.size() - 3) * 3 + j);
         }
-//        cv::imshow("2", mask);
-//        cv::waitKey(1);
     }
 
-    return false;
+    return _type == NONE;
 }
 
 bool Finder::_detectText(QPixmap pixmap)
@@ -83,21 +78,13 @@ bool Finder::_detectText(QPixmap pixmap)
         extractor.compute(img_scene, keypoints_scene, descriptors_scene);
 
         for (int i = 0; i < 6; i++){
-            cv::Mat img_object = cv::imread("templates//" + TEMPLATESPATH[i].toStdString(), CV_LOAD_IMAGE_GRAYSCALE);
-
-            std::vector<cv::KeyPoint> keypoints_object;
-            detector.detect(img_object, keypoints_object);
-
-            cv::Mat descriptors_object;
-            extractor.compute(img_object, keypoints_object, descriptors_object);
-
             cv::FlannBasedMatcher matcher;
             cv::vector< cv::DMatch > matches;
-            matcher.match( descriptors_object, descriptors_scene, matches );
+            matcher.match( _descriptors[i], descriptors_scene, matches );
 
             float max_dist = 0; float min_dist = 100;
 
-            for(size_t i = 0; i < static_cast<size_t>(descriptors_object.rows); i++ )
+            for(size_t i = 0; i < static_cast<size_t>(_descriptors[i].rows); i++ )
             {
                 float dist = matches[i].distance;
                 if( dist < min_dist ) min_dist = dist;
@@ -106,7 +93,7 @@ bool Finder::_detectText(QPixmap pixmap)
 
             std::vector< cv::DMatch > good_matches;
 
-            for(size_t i = 0; i < static_cast<size_t>(descriptors_object.rows); i++ )
+            for(size_t i = 0; i < static_cast<size_t>(_descriptors[i].rows); i++ )
             {
                 if( matches[i].distance < 3 * min_dist )
                 {
@@ -117,33 +104,46 @@ bool Finder::_detectText(QPixmap pixmap)
             std::vector<cv::Point2f> obj;
             std::vector<cv::Point2f> scene;
 
-            for(size_t i = 0; i < good_matches.size(); i++ )
+            for(size_t j = 0; j < good_matches.size(); j++ )
             {
-                obj.push_back( keypoints_object[static_cast<size_t>(good_matches[i].queryIdx)].pt );
-                scene.push_back( keypoints_scene[static_cast<size_t>(good_matches[i].trainIdx)].pt );
+                obj.push_back( _keypoints[i][static_cast<size_t>(good_matches[j].queryIdx)].pt );
+                scene.push_back( keypoints_scene[static_cast<size_t>(good_matches[j].trainIdx)].pt );
             }
 
             if (obj.size() * scene.size() <= 16) return false;
             cv::Mat H = cv::findHomography(obj, scene, CV_RANSAC);
             std::vector<cv::Point2f> obj_corners(4);
             obj_corners[0] = cvPoint(0,0);
-            obj_corners[1] = cvPoint( img_object.cols, 0 );
-            obj_corners[2] = cvPoint( img_object.cols, img_object.rows );
-            obj_corners[3] = cvPoint( 0, img_object.rows );
+            obj_corners[1] = cvPoint( _img_objects[i].cols, 0 );
+            obj_corners[2] = cvPoint( _img_objects[i].cols, _img_objects[i].rows );
+            obj_corners[3] = cvPoint( 0, _img_objects[i].rows );
 
             std::vector<cv::Point2f> scene_corners(4);
             cv::perspectiveTransform(obj_corners, scene_corners, H);
 
             float square = _getSquare(scene_corners);
             if (cv::isContourConvex(scene_corners) && square > MINSQUARE && square < MAXSQUARE){
-                *_rect = _getRect(scene_corners);
-                *_type = static_cast<Type>(i + 1);
+                _rect = _getRect(scene_corners);
+                _type = static_cast<FigureType>(i + 1);
                 return true;
             }
         }
     } catch (...) {
     }
     return false;
+}
+
+void Finder::_loadDescriptors()
+{
+    cv::SurfFeatureDetector detector(400);
+    cv::SurfDescriptorExtractor extractor;
+
+    for (int i = 0; i < 6; i++){
+        _img_objects[i] = cv::imread("templates//" + TEMPLATESPATH[i].toStdString(), CV_LOAD_IMAGE_GRAYSCALE);
+        qDebug() << "1";
+        detector.detect(_img_objects[i], _keypoints[i]);
+        extractor.compute(_img_objects[i], _keypoints[i], _descriptors[i]);
+    }
 }
 
 cv::Mat Finder::_getMask(QPixmap pixmap, int index)
@@ -196,6 +196,11 @@ void Finder::_loadSettings()
         _colors[i].vMin = _settings->value("v_low", 0).toInt();
         _settings->endGroup();
     }
+}
+
+void Finder::_initConnections()
+{
+    connect(_settings, &Settings::settingsUpdate, this, &Finder::_loadSettings);
 }
 
 float Finder::_getSquare(std::vector<cv::Point2f> poitns)

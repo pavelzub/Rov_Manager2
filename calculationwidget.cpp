@@ -49,6 +49,8 @@ void CalculationWidget::_createLayouts()
     addWidget("Маштаб:", _size, true, "1428");
 //    _windSpeed->setText("-(1/270)*t**2+25");
 
+    _map = new Map(this);
+
     _resultAngle = new QLabel(this);
     _resultLen = new QLabel(this);
     _resultAngle->setFixedHeight(20);
@@ -60,6 +62,7 @@ void CalculationWidget::_createLayouts()
     HLayout->addLayout(nameLayout);
     HLayout->addLayout(valLayout);
     mainLayout->addLayout(HLayout);
+    mainLayout->addWidget(_map);
     mainLayout->addLayout(ResLayout);
     mainLayout->addWidget(_calculateBtn);
     setLayout(mainLayout);
@@ -85,8 +88,8 @@ void CalculationWidget::_calculate()
     double v1 = _startUpSpeed->text().replace(",", ".").toDouble();
     double V2 = _fallHorSpeed->text().replace(",", ".").toDouble();
     double v2 = _fallUpSpeed->text().replace(",", ".").toDouble();
-    double a = _startAngle->text().replace(",", ".").toDouble();
-    double b = _windAngle->text().replace(",", ".").toDouble();
+    double startAngle = _startAngle->text().replace(",", ".").toDouble();
+    double windAnlge = _windAngle->text().replace(",", ".").toDouble() - 180;
     double t = _time->text().replace(",", ".").toDouble();
     double m = _size->text().replace(",", ".").toDouble();
     QString speed = _windSpeed->text().replace(",", ".");
@@ -98,24 +101,22 @@ void CalculationWidget::_calculate()
         return;
     }
 
-    a = a / 180.0 * M_PI;
-    b += b < 180 ? 180 : 0;
-    b = (b - 180.0) / 180.0 * M_PI;
-    double windx = wind * qSin(b);
-    double windy = wind * qCos(b);
-    double startx = V1 * t * qSin(a);
-    double starty = V1 * t * qCos(a);
-    double fallx = V2 * fallTime * qSin(a);
-    double fally = V2 * fallTime * qCos(a);
+    QLineF windVec(0, 0, wind, 0);
+    QLineF ascentVec(0, 0, V1 * t, 0);
+    QLineF fallVec(0, 0, V2 * fallTime, 0);
 
-    QLineF res(0, 0, windx + startx + fallx, windy + starty + fally);
-    QLineF w(0, 0, windx, windy);
-    QLineF q(0, 0, startx + fallx, starty + fally);
+    windVec.setAngle(windAnlge);
+    ascentVec.setAngle(startAngle);
+    fallVec.setAngle(startAngle);
 
-    qDebug() << "Wind len: " << w.length() << " angle:" << w.angle();
-    qDebug() << "Len len: " << q.length() << " angle:" << q.angle();
+    QLineF res(0, 0, windVec.x2() + ascentVec.x2() + fallVec.x2(), windVec.y2() + ascentVec.y2() + fallVec.y2());
+
+    qDebug() << "Wind west: " << windVec.length() << " south:" << windVec.y2();
+    qDebug() << "Ascent west: " << ascentVec.length() << " south:" << ascentVec.y2();
+    qDebug() << "Fall west: " << fallVec.length() << " south:" << fallVec.y2();
     _resultAngle->setText("Angle: " + QString::number(res.angle()));
-    _resultLen->setText("Length: " + QString::number(res.length() / m));
+    _resultLen->setText("Length: " + QString::number(res.length()));
+    _map->setLine(res);
 }
 
 bool CalculationWidget::_integrate(QString foo, double b, double &result)

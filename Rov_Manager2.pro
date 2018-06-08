@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui multimedia multimediawidgets printsupport
+QT       += core gui multimedia multimediawidgets printsupport websockets network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -63,7 +63,6 @@ SOURCES += \
     mainwidget.cpp \
     sceenshot/screenlable.cpp \
     sceenshot/screenshotwindow.cpp \
-    video/videostreamparser.cpp \
     video/videowidget.cpp \
     finder/finder.cpp \
     finder/imagedetector.cpp \
@@ -80,13 +79,17 @@ SOURCES += \
     rov_data_types/serializable.cpp \
     configwidget.cpp \
     ctkrangeslider.cpp \
-    clickablelabel.cpp
+    clickablelabel.cpp \
+    settings.cpp \
+    map.cpp \
+    video/websocket.cpp \
+    obsconfigwidget.cpp \
+    moshnyiwidget.cpp
 
 HEADERS += \
     mainwidget.hpp \
     sceenshot/screenlable.hpp \
     sceenshot/screenshotwindow.hpp \
-    video/videostreamparser.hpp \
     video/videowidget.hpp \
     mainwindow.hpp \
     finder/finder.hpp \
@@ -105,4 +108,9 @@ HEADERS += \
     rov_data_types/serializable.hpp \
     configwidget.hpp \
     ctkrangeslider.hpp \
-    clickablelabel.hpp
+    clickablelabel.hpp \
+    settings.hpp \
+    map.hpp \
+    video/websocket.hpp \
+    obsconfigwidget.hpp \
+    moshnyiwidget.hpp
