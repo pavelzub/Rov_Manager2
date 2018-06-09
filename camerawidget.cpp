@@ -7,7 +7,8 @@ CameraWidget::CameraWidget(Settings *settings, QWidget *parent) :
     QWidget(parent),
     _screenBtn(new QPushButton(this)),
     _searchBtn(new QPushButton(this)),
-    _videoWidget(new VideoWidget(settings, this))
+    _videoWidget(new VideoWidget(settings, this)),
+    _type(new QLabel(this))
 {
     _createLayout();
     _initConnections();
@@ -28,6 +29,13 @@ void CameraWidget::_createLayout()
     _screenBtn->setText("Скриншот");
     _searchBtn->setText("Начать распознавание");
 
+    QFont font = _type->font();
+    font.setPointSize(72);
+    font.setBold(true);
+    _type->setFont(font);
+    _type->setStyleSheet("border: 2px;");
+
+    menuLayout->addWidget(_type);
     menuLayout->addWidget(_screenBtn);
     menuLayout->addWidget(_searchBtn);
     mainLayout->addLayout(camLayout);
@@ -39,6 +47,7 @@ void CameraWidget::_initConnections()
 {
     connect(_screenBtn, &QPushButton::pressed, this, &CameraWidget::_buttonScreenPress);
     connect(_searchBtn, &QPushButton::pressed, this, &CameraWidget::_buttonSearchPress);
+    connect(_videoWidget, &VideoWidget::findFigure, [this](QString s){ _type->setText(s);});
 }
 
 void CameraWidget::_buttonScreenPress()

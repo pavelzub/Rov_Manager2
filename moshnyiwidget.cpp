@@ -38,7 +38,6 @@ void MoshnyiWidget::_createLayout()
     addWidget("Efficiency of Turbines:", Cp, true, "0,32");
 
     auto res = new QLabel(this);
-    res->setFont(20));
     auto calc = new QPushButton(this);
     calc->setText("Calculate");
 

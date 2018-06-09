@@ -35,7 +35,8 @@ void VideoWidget::paintEvent(QPaintEvent *event)
     {
         QRect rect(_imageDetector->getRect());
         painter.drawRect(rect);
-        painter.drawText(rect.x(), rect.y() - 20, rect.width(), 20, Qt::AlignCenter, FIGURENAMES[_imageDetector->getType() - 1]);
+        if (_imageDetector->getType() != 1) emit findFigure(FIGURENAMES[_imageDetector->getType() - 1]);
+       //painter.drawText(0, 0, -20, -20, Qt::AlignCenter, FIGURENAMES[_imageDetector->getType() - 1]);
     }
 
     painter.end();

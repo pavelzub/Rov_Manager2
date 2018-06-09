@@ -23,7 +23,7 @@ private:
     void _initConnetions();
     void _initVideoParser();
 
-    const QString URL = "192.168.1.65:3090";
+    const QString URL = "192.168.88.242:3090";
     Settings* _settings;
     CameraWidget* _cameraWidget;
     CalculationWidget* _calculationWidget;

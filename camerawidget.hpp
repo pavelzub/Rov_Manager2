@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QPushButton>
+#include <QLabel>
 
 #include "video/videowidget.hpp"
 #include "settings.hpp"
@@ -23,6 +24,7 @@ private:
     QPushButton* _screenBtn;
     QPushButton* _searchBtn;
     VideoWidget* _videoWidget;
+    QLabel* _type;
 };
 
 #endif // CAMERAWIFGET_HPP

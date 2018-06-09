@@ -18,6 +18,9 @@ public:
     void Update(QPixmap pixmap);
     QPixmap GetPixmap();
 
+signals:
+    void findFigure(QString s);
+
 protected:
     void paintEvent(QPaintEvent *event) override;
 
