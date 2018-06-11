@@ -24,6 +24,7 @@ private:
     void _initVideoParser();
 
     const QString URL = "192.168.88.242:3090";
+//    const QString URL = "udp://192.168.1.1:1234";
     Settings* _settings;
     CameraWidget* _cameraWidget;
     CalculationWidget* _calculationWidget;

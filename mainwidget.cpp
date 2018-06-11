@@ -7,6 +7,7 @@
 #include <QDoubleValidator>
 #include <QDebug>
 #include "video/websocket.hpp"
+#include "video/videostreamparser.hpp"
 
 MainWidget::MainWidget(QWidget *parent) :
     QTabWidget(parent),
@@ -41,14 +42,30 @@ void MainWidget::_initConnetions()
 void MainWidget::_initVideoParser()
 {
     QThread* thread = new QThread;
-    WebSocket* socket = new WebSocket(URL);
 
-    socket->moveToThread(thread);
+    if (URL[0] == "u"){
+        av_register_all();
+        avformat_network_init();
+        avcodec_register_all();
 
-    connect(thread, &QThread::started, socket, &WebSocket::process);
-    connect(socket, &WebSocket::newFrame, _cameraWidget, &CameraWidget::UpdateCamera);
-    connect(socket, &WebSocket::newFrame, _configWidget, &ConfigWidget::UpdateCamera);
-    connect(thread, &QThread::finished, thread, &QThread::deleteLater);
+        VideoStreamParser* parser = new VideoStreamParser(URL);
+        parser->moveToThread(thread);
+        connect(thread, &QThread::started, parser, &VideoStreamParser::process);
+        connect(parser, &VideoStreamParser::finished, thread, &QThread::quit);
+        connect(parser, &VideoStreamParser::repaint, _cameraWidget, &CameraWidget::UpdateCamera);
+        connect(parser, &VideoStreamParser::repaint, _configWidget, &ConfigWidget::UpdateCamera);
+        connect(parser, &VideoStreamParser::finished, parser, &VideoStreamParser::deleteLater);
+    }
+    else
+    {
+        WebSocket* socket = new WebSocket(URL);
 
+        socket->moveToThread(thread);
+
+        connect(thread, &QThread::started, socket, &WebSocket::process);
+        connect(socket, &WebSocket::newFrame, _cameraWidget, &CameraWidget::UpdateCamera);
+        connect(socket, &WebSocket::newFrame, _configWidget, &ConfigWidget::UpdateCamera);
+        connect(thread, &QThread::finished, thread, &QThread::deleteLater);
+    }
     thread->start();
 }

@@ -14,6 +14,7 @@ class ScreenshotWindow : public QMainWindow
     Q_OBJECT
 public:
     explicit ScreenshotWindow(QPixmap pixmap, QWidget *parent = nullptr);
+    static void SetSize(QSize size);
 
 private:
     void _createLayouts();
@@ -22,6 +23,7 @@ private:
     ScreenLabel* _screenShot;
     QLineEdit* _textEdit;
     QPushButton* _clearBtn;
+    static QSize _size;
 };
 
 #endif // SCREENSHOTWINDOW_HPP

@@ -16,8 +16,7 @@ Finder::Finder(Settings *settings, QObject *parent) : QObject(parent)
 void Finder::detect(QPixmap pixmap)
 {
     _type = NONE;
-    _detectText(pixmap);
-//            || _detectFigure(pixmap);
+    _detectText(pixmap) || _detectFigure(pixmap);
 
     emit findImage(_type, _rect);
 }
@@ -25,33 +24,24 @@ void Finder::detect(QPixmap pixmap)
 bool Finder::_detectFigure(QPixmap pixmap)
 {
     std::vector<std::vector<cv::Point> > contours;
+    float squere = 0;
+    QRect r;
+    FigureType t = NONE;
     for (int j = 0; j < 3; j++){
-        float squere = 0;
-        qDebug() << 2;
         cv::Mat mask = _getMask(pixmap, j);
-        qDebug() << 3;
         cv::findContours(mask, contours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
-        qDebug() << 4;
         for (std::size_t i = 0; i < contours.size(); i++)
         {
-            qDebug() << 5;
             if (contours.at(i).size() < 5) continue;
-            qDebug() << 6;
             if (std::fabs(cv::contourArea(contours.at(i))) < 1200.0) continue;
-            qDebug() << 7;
-            static std::vector<cv::Point2f> hull;
-            qDebug() << 8;
+            static std::vector<cv::Point> hull;
             cv::convexHull(contours.at(i), hull, true);
-            qDebug() << 9;
             cv::approxPolyDP(hull, hull, 15, true);
-            qDebug() << 10;
             if (!cv::isContourConvex(hull)) continue;
-            qDebug() << 11;
             cv::RotatedRect bEllipse = cv::fitEllipse(contours.at(i));
-            qDebug() << 12;
             if (hull.size() > 4) continue;
 
-            float tmp = _getSquare(hull);
+            float tmp = cv::contourArea(hull);
             if (tmp < squere) break;
 
             squere = tmp;
@@ -63,12 +53,13 @@ bool Finder::_detectFigure(QPixmap pixmap)
                 max.setX(qMax(max.x(), static_cast<int>(i.x)));
                 max.setY(qMax(max.y(), static_cast<int>(i.y)));
             }
-            _rect = QRect(min, max);
-//            qDebug() << 1 + (hull.size() - 3) * 3 + j;
-            _type = static_cast<FigureType>(1 + (hull.size() - 3) * 3 + j);
+            r = QRect(min, max);
+            t = static_cast<FigureType>(1 + (hull.size() - 3) * 3 + j);
         }
     }
 
+    _rect = r;
+    _type = t;
     return _type == NONE;
 }
 
@@ -186,7 +177,7 @@ cv::Mat Finder::_getMask(QPixmap pixmap, int index)
     cv::Scalar lower1(0, sMin, vMin);
     cv::inRange(image1, lower1, upper1, image1);
 
-    image = image + image1;
+    image = image | image1;
     cv::imshow(QString::number(index).toStdString(), image);
     cv::waitKey(1);
 
@@ -210,16 +201,6 @@ void Finder::_loadSettings()
 void Finder::_initConnections()
 {
     connect(_settings, &Settings::settingsUpdate, this, &Finder::_loadSettings);
-}
-
-float Finder::_getSquare(std::vector<cv::Point2f> poitns)
-{
-    float result = 0;
-    for (size_t i = 0; i < poitns.size(); i++){
-        result += poitns[i].x * poitns[(i + 1) % poitns.size()].y;
-        result -= poitns[i].y * poitns[(i + 1) % poitns.size()].x;
-    }
-    return qAbs(result);
 }
 
 QRect Finder::_getRect(std::vector<cv::Point2f> poitns)

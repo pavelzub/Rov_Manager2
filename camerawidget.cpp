@@ -34,6 +34,7 @@ void CameraWidget::_createLayout()
     font.setBold(true);
     _type->setFont(font);
     _type->setStyleSheet("border: 2px;");
+    _type->setAlignment(Qt::AlignCenter);
 
     menuLayout->addWidget(_type);
     menuLayout->addWidget(_screenBtn);
@@ -52,7 +53,8 @@ void CameraWidget::_initConnections()
 
 void CameraWidget::_buttonScreenPress()
 {
-    ScreenshotWindow* w(new ScreenshotWindow(_videoWidget->GetPixmap(), this));
+    ScreenshotWindow::SetSize(_videoWidget->GetPixmap().size());
+    ScreenshotWindow* w(new ScreenshotWindow(_videoWidget->GetPixmap()));
     w->show();
 }
 

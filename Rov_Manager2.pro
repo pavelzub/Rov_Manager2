@@ -84,7 +84,8 @@ SOURCES += \
     map.cpp \
     video/websocket.cpp \
     obsconfigwidget.cpp \
-    moshnyiwidget.cpp
+    moshnyiwidget.cpp \
+    video/videostreamparser.cpp
 
 HEADERS += \
     mainwidget.hpp \
@@ -113,4 +114,5 @@ HEADERS += \
     map.hpp \
     video/websocket.hpp \
     obsconfigwidget.hpp \
-    moshnyiwidget.hpp
+    moshnyiwidget.hpp \
+    video/videostreamparser.hpp

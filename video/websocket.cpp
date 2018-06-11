@@ -11,6 +11,7 @@ WebSocket::WebSocket(QString url, QObject *parent):
 void WebSocket::process()
 {
     _socket.open(QUrl(_url));
+    qDebug() << _url;
 }
 
 void WebSocket::setUrl(QString url)

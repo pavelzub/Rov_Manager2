@@ -25,7 +25,7 @@ private:
     const int COLORTOLERANCE = 100;
     const int MAXSQUARE = 1000000;
     const int MINSQUARE = 10000;
-    const QString names[3] = {"RED", "BLUE", "YELLOW"};
+    const QString names[3] = {"RED", "YELLOW", "BLUE"};
 
     struct Color{
         int hMax, hMin, sMax, sMin, vMax, vMin;
@@ -36,7 +36,17 @@ private:
     void _loadDescriptors();
     void _loadSettings();
     void _initConnections();
-    float _getSquare(std::vector<cv::Point2f> poitns);
+
+    template<class T>
+    float _getSquare(std::vector<T> poitns){
+        float result = 0;
+        for (size_t i = 0; i < poitns.size(); i++){
+            result += poitns[i].x * poitns[(i + 1) % poitns.size()].y;
+            result -= poitns[i].y * poitns[(i + 1) % poitns.size()].x;
+        }
+        return qAbs(result);
+    }
+
     FigureColor _getFigureColor(QColor color);
     QRect _getRect(std::vector<cv::Point2f> poitns);
     cv::Mat _getMask(QPixmap pixmap, int index);

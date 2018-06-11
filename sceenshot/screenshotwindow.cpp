@@ -3,6 +3,8 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 
+QSize ScreenshotWindow::_size = {800, 600};
+
 ScreenshotWindow::ScreenshotWindow(QPixmap pixmap, QWidget *parent) :
     QMainWindow(parent),
     _screenShot(new ScreenLabel(pixmap, this)),
@@ -10,10 +12,14 @@ ScreenshotWindow::ScreenshotWindow(QPixmap pixmap, QWidget *parent) :
     _clearBtn(new QPushButton(this))
 {
     move(0, 0);
-    setFixedSize(_screenShot->width(), _screenShot->height() + 20);
     setAttribute(Qt::WA_DeleteOnClose, true);
     _createLayouts();
     _initConnections();
+}
+
+void ScreenshotWindow::SetSize(QSize size)
+{
+    _size = size;
 }
 
 void ScreenshotWindow::_createLayouts()
@@ -28,6 +34,7 @@ void ScreenshotWindow::_createLayouts()
     lable->setStyleSheet("font: 12pt;");
     _textEdit->setValidator(new QDoubleValidator(0, 100, 4, this));
     _clearBtn->setText("Очистить");
+    _screenShot->setFixedSize(_size);
 
     textLayout->addWidget(lable);
     textLayout->addWidget(_textEdit);
