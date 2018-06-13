@@ -17,7 +17,8 @@ MainWidget::MainWidget(QWidget *parent) :
     _obsWidget(new ObsWidget(this)),
     _configWidget(new ConfigWidget(_settings, this)),
     _obsConfigWidget(new ObsConfigWidget(this)),
-    _moshnyiWidget(new MoshnyiWidget(this))
+    _moshnyiWidget(new MoshnyiWidget(this)),
+    _dataStore(new DataStore(this))
 {
     _createLayout();
     _initConnetions();
@@ -37,6 +38,7 @@ void MainWidget::_createLayout()
 void MainWidget::_initConnetions()
 {
     connect(_obsConfigWidget, &ObsConfigWidget::newObsData, _obsWidget, &ObsWidget::buildPlot);
+    connect(_dataStore, &DataStore::telimetryUpdate, _moshnyiWidget, &MoshnyiWidget::setDepth);
 }
 
 void MainWidget::_initVideoParser()

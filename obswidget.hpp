@@ -15,7 +15,6 @@ public:
 private:
     void _createLayout();
 
-    DataStore* _dataStore;
     QCustomPlot* _plot;
 };
 

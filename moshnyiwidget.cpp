@@ -1,9 +1,9 @@
 #include "moshnyiwidget.hpp"
 #include <QDoubleValidator>
-#include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
 #include <QVBoxLayout>
+#include <QGridLayout>
 #include <QDebug>
 
 MoshnyiWidget::MoshnyiWidget(QWidget *parent) : QWidget(parent)
@@ -11,9 +11,24 @@ MoshnyiWidget::MoshnyiWidget(QWidget *parent) : QWidget(parent)
     _createLayout();
 }
 
+void MoshnyiWidget::setDepth(float yaw, float pitch, float roll, float depth)
+{
+    _depth->setText(QString::number(depth));
+}
+
 void MoshnyiWidget::_createLayout()
 {
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
+
+    mainLayout->addLayout(_createTurboLayout());
+    mainLayout->addLayout(_createDepthLayout());
+
+    setLayout(mainLayout);
+}
+
+QLayout *MoshnyiWidget::_createTurboLayout()
+{
+    auto layout = new QVBoxLayout;
     QHBoxLayout* HLayout = new QHBoxLayout();
     QVBoxLayout* nameLayout = new QVBoxLayout;
     QVBoxLayout* valLayout = new QVBoxLayout;
@@ -51,8 +66,53 @@ void MoshnyiWidget::_createLayout()
 
     HLayout->addLayout(nameLayout);
     HLayout->addLayout(valLayout);
-    mainLayout->addLayout(HLayout);
-    mainLayout->addWidget(res);
-    mainLayout->addWidget(calc);
-    setLayout(mainLayout);
+    layout->addLayout(HLayout);
+    layout->addWidget(res);
+    layout->addWidget(calc);
+
+    return layout;
+}
+
+QLayout *MoshnyiWidget::_createDepthLayout()
+{
+    auto layout = new QGridLayout;
+
+    _depth = new QLabel(this);
+    QLabel* val2 = new QLabel(this);
+    QLabel* val3 = new QLabel(this);
+    QLabel* val4 = new QLabel(this);
+
+    layout->addWidget(_depth, 0, 1);
+    layout->addWidget(val2, 1, 1);
+    layout->addWidget(val3, 2, 1);
+    layout->addWidget(val4, 3, 1);
+
+    QLabel* depth1 = new QLabel(this);
+    depth1->setText("Текущая глубина: ");
+
+    QPushButton* depth2 = new QPushButton(this);
+    depth2->setText("Глубина на дне: ");
+    connect(depth2, &QPushButton::pressed, [this, val2, val3, val4](){
+        val2->setText(_depth->text());
+        val4->setText(QString::number(val2->text().toDouble() - val3->text().toDouble()));
+    });
+//    depth2->setFixedSize(100,20);
+
+    QPushButton* depth3 = new QPushButton(this);
+    depth3->setText("Глубина установки лага: ");
+    connect(depth3, &QPushButton::pressed, [this, val2, val3, val4](){
+        val3->setText(_depth->text());
+        val4->setText(QString::number(val2->text().toDouble() - val3->text().toDouble()));
+    });
+//    depth3->setFixedSize(100,20);
+
+    QLabel* depth4 = new QLabel(this);
+    depth4->setText("Итоговое расстояние: ");
+
+    layout->addWidget(depth1, 0, 0);
+    layout->addWidget(depth2, 1, 0);
+    layout->addWidget(depth3, 2, 0);
+    layout->addWidget(depth4, 3, 0);
+
+    return layout;
 }

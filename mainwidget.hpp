@@ -11,6 +11,7 @@
 #include "settings.hpp"
 #include "obsconfigwidget.hpp"
 #include "moshnyiwidget.hpp"
+#include "ethernet/datastore.hpp"
 
 class MainWidget : public QTabWidget
 {
@@ -23,7 +24,7 @@ private:
     void _initConnetions();
     void _initVideoParser();
 
-    const QString URL = "192.168.88.242:3090";
+    const QString URL = "192.168.88.228:3090";
 //    const QString URL = "udp://192.168.1.1:1234";
     Settings* _settings;
     CameraWidget* _cameraWidget;
@@ -32,6 +33,7 @@ private:
     ConfigWidget* _configWidget;
     ObsConfigWidget* _obsConfigWidget;
     MoshnyiWidget* _moshnyiWidget;
+    DataStore* _dataStore;
 };
 
 #endif // MAINWIDGET_HPP

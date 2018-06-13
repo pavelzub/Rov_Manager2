@@ -5,7 +5,6 @@
 
 ObsWidget::ObsWidget(QWidget *parent) :
     QWidget(parent),
-    _dataStore(new DataStore(this)),
     _plot(new QCustomPlot)
 {
     _createLayout();

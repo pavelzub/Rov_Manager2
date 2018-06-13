@@ -32,7 +32,7 @@ private:
     void _camInfoSend();
     void _sendObs();
 
-    const QString URL= "ws://192.168.1.68:4090";
+    const QString URL= "ws://192.168.88.228:4090";
     QLineEdit* _queryText;
     QTextEdit* _textArea;
     QComboBox* _comboBox;
