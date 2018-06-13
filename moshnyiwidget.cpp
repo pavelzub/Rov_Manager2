@@ -47,10 +47,10 @@ QLayout *MoshnyiWidget::_createTurboLayout()
     QLineEdit *N, *q, *D, *V, *Cp;
 
     addWidget("Rotors count:", N, true, "4");
-    addWidget("Seawater q:", q, true, "1,025");
-    addWidget("Diametr:", D, true, "16");
     addWidget("Speed:", V, true, "4,1");
+    addWidget("Diametr:", D, true, "16");
     addWidget("Efficiency of Turbines:", Cp, true, "0,32");
+    addWidget("Seawater q:", q, true, "1,025");
 
     auto res = new QLabel(this);
     auto calc = new QPushButton(this);
@@ -94,7 +94,7 @@ QLayout *MoshnyiWidget::_createDepthLayout()
     depth2->setText("Глубина на дне: ");
     connect(depth2, &QPushButton::pressed, [this, val2, val3, val4](){
         val2->setText(_depth->text());
-        val4->setText(QString::number(val2->text().toDouble() - val3->text().toDouble()));
+        val4->setText(QString::number(val2->text().toDouble() - val3->text().toDouble() + 2.5));
     });
 //    depth2->setFixedSize(100,20);
 
@@ -102,7 +102,7 @@ QLayout *MoshnyiWidget::_createDepthLayout()
     depth3->setText("Глубина установки лага: ");
     connect(depth3, &QPushButton::pressed, [this, val2, val3, val4](){
         val3->setText(_depth->text());
-        val4->setText(QString::number(val2->text().toDouble() - val3->text().toDouble()));
+        val4->setText(QString::number(val2->text().toDouble() - val3->text().toDouble() + 2.5));
     });
 //    depth3->setFixedSize(100,20);
 
