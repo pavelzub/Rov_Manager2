@@ -26,8 +26,8 @@ void CameraWidget::_createLayout()
     QVBoxLayout* menuLayout = new QVBoxLayout;
 
     camLayout->addWidget(_videoWidget);
-    _screenBtn->setText("Скриншот");
-    _searchBtn->setText("Начать распознавание");
+    _screenBtn->setText("Screenshot");
+    _searchBtn->setText("Start recognition");
 
     QFont font = _type->font();
     font.setPointSize(72);
@@ -60,12 +60,12 @@ void CameraWidget::_buttonScreenPress()
 
 void CameraWidget::_buttonSearchPress()
 {
-    if (_searchBtn->text() == "Начать распознавание"){
-        _searchBtn->setText("Остановить распознавание");
+    if (_searchBtn->text() == "Start recognition"){
+        _searchBtn->setText("Stop recognition");
         _videoWidget->StartStopRecognition(true);
     }
     else {
-        _searchBtn->setText("Начать распознавание");
+        _searchBtn->setText("Start recognition");
         _videoWidget->StartStopRecognition(false);
     }
 }

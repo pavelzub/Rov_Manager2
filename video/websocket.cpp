@@ -50,5 +50,5 @@ void WebSocket::_getData(const QByteArray &message)
 
 void WebSocket::_error(QAbstractSocket::SocketError error)
 {
-    _socket.open(QUrl(_url));
+//    _socket.open(QUrl(_url));
 }

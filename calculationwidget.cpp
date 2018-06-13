@@ -55,7 +55,7 @@ void CalculationWidget::_createLayouts()
     _resultLen = new QLabel(this);
     _resultAngle->setFixedHeight(20);
     _resultLen->setFixedHeight(20);
-    _calculateBtn->setText("Расчитать");
+    _calculateBtn->setText("Calculate");
 
     ResLayout->addWidget(_resultAngle);
     ResLayout->addWidget(_resultLen);

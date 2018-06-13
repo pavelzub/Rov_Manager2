@@ -48,10 +48,10 @@ void ConfigWidget::_createLayout()
     }
 
     _pipetBtn->setCheckable(true);
-    _pipetBtn->setText("Пипетка");
+    _pipetBtn->setText("Eyedropper");
     menuLauout->addWidget(_pipetBtn);
 
-    _saveBtn->setText("Сохранить");
+    _saveBtn->setText("Save");
 
     layout->addWidget(_image);
     menuLauout->addWidget(_saveBtn);
@@ -97,7 +97,7 @@ void ConfigWidget::_setIntervals(int h, int s, int v)
     _pipetBtn->setChecked(false);
     if (h < 25) h += 180;
     _sliders[0]->setMinimumValue(MAX(h - 25, 0));
-    _sliders[0]->setMaximumValue(MIN(h + 25, 180));
+    _sliders[0]->setMaximumValue(MIN(h + 25, 360));
     _sliders[1]->setMinimumValue(MAX(s - 25, 0));
     _sliders[1]->setMaximumValue(MIN(s + 25, 255));
     _sliders[2]->setMinimumValue(MAX(v - 50, 0));

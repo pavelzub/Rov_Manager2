@@ -27,12 +27,12 @@ MainWidget::MainWidget(QWidget *parent) :
 
 void MainWidget::_createLayout()
 {
-    addTab(_cameraWidget, "Камера");
-    addTab(_calculationWidget, "Точка падения");
-    addTab(_moshnyiWidget, "Расчет мощности");
-    addTab(_obsWidget, "Сейсмометр");
-    addTab(_obsConfigWidget, "Настройка");
-    addTab(_configWidget, "Конфиг");
+    addTab(_cameraWidget, "Camera");
+    addTab(_calculationWidget, "Fall point");
+    addTab(_moshnyiWidget, "Power calculation");
+    addTab(_obsWidget, "Seismometer");
+    addTab(_obsConfigWidget, "OBS config");
+    addTab(_configWidget, "Recognition config");
 }
 
 void MainWidget::_initConnetions()

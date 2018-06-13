@@ -6,6 +6,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QIntValidator>
+#include <QJsonArray>
 
 ObsConfigWidget::ObsConfigWidget(QWidget *parent) : QWidget(parent)
 {
@@ -33,31 +34,31 @@ QLayout *ObsConfigWidget::_createObsLayout()
     QHBoxLayout* oneMoreButtonsLayout = new QHBoxLayout;
 
     _textArea = new  QTextEdit(this);
-    _textArea->setEnabled(false);
+//    _textArea->setEnabled(false);
 
     auto lable = new QLabel(this);
-    lable->setText("Запрос");
+    lable->setText("Request");
     _queryText = new QLineEdit(this);
     _queryText->setEnabled(false);
 
     auto ws = new QPushButton(this);
-    ws->setText("connect ws");
+    ws->setText("Connect ws");
     auto parse = new QPushButton(this);
-    parse->setText("Нарисовать график");
+    parse->setText("Draw chart");
     auto sendBtn = new QPushButton(this);
-    sendBtn->setText("Отправить");
+    sendBtn->setText("Send");
     auto search = new QPushButton(this);
-    search->setText("поиск AP");
+    search->setText("Find AP");
     auto connect1 = new QPushButton(this);
-    connect1->setText("connect AP");
+    connect1->setText("Connect AP");
     auto connect2 = new QPushButton(this);
-    connect2->setText("connect server");
+    connect2->setText("Connect server");
     auto esp = new QPushButton(this);
-    esp->setText("huinya dlya esp");
+    esp->setText("Esp info");
     auto http = new QPushButton(this);
-    http->setText("http request");
+    http->setText("Http request");
     auto disconnect = new QPushButton(this);
-    disconnect->setText("disconnect");
+    disconnect->setText("Disconnect");
 
     connect(sendBtn, &QPushButton::pressed, this,&ObsConfigWidget::_sendObs);
     connect(parse, &QPushButton::pressed, this,&ObsConfigWidget::_parseData);
@@ -100,7 +101,7 @@ QLayout *ObsConfigWidget::_createCameraslayout()
     QHBoxLayout* camSelectLayout = new QHBoxLayout;
 
     auto lablesize = new QLabel(this);
-    lablesize->setText("Размер");
+    lablesize->setText("Size");
     _comboBox = new QComboBox(this);
     _comboBox->addItems({"352 x 240", "640 x 360", "800 x 600", "854 x 480", "960 x 540", "1024 x 768", "1152 x 864"});
 
@@ -108,7 +109,7 @@ QLayout *ObsConfigWidget::_createCameraslayout()
     sizeLayout->addWidget(_comboBox);
 
     auto lableQuality = new QLabel(this);
-    lableQuality->setText("Качество");
+    lableQuality->setText("Quality");
     _quality = new QLineEdit(this);
     _quality->setValidator(new QIntValidator(1, 100));
 
@@ -116,7 +117,7 @@ QLayout *ObsConfigWidget::_createCameraslayout()
     qualityLayout->addWidget(_quality);
 
     auto lablefps = new QLabel(this);
-    lablefps->setText("Фпс");
+    lablefps->setText("FPS");
     _fps = new QLineEdit(this);
     _fps->setValidator(new QIntValidator(1, 10000));
 
@@ -124,17 +125,17 @@ QLayout *ObsConfigWidget::_createCameraslayout()
     fpsLayout->addWidget(_fps);
 
     auto lableSelect = new QLabel(this);
-    lableSelect->setText("Выбор камеры");
+    lableSelect->setText("Select camera");
     _camerasBox = new QComboBox(this);
 
     camSelectLayout->addWidget(lableSelect);
     camSelectLayout->addWidget(_camerasBox);
 
     auto saveBtn = new QPushButton(this);
-    saveBtn->setText("Сохранить");
+    saveBtn->setText("Save");
     connect(saveBtn, &QPushButton::pressed, this,&ObsConfigWidget::_camInfoSend);
     auto refreshBtn = new QPushButton(this);
-    refreshBtn->setText("Обновить");
+    refreshBtn->setText("Update");
     connect(refreshBtn, &QPushButton::pressed, this,&ObsConfigWidget::_camInfoUpdate);
 
     buttonsLayout->addWidget(saveBtn);
@@ -161,6 +162,7 @@ void ObsConfigWidget::_initConnections()
 void ObsConfigWidget::_socketConnect()
 {
     _queryText->setEnabled(true);
+    _camInfoUpdate();
 }
 
 void ObsConfigWidget::_socketDisconnect()
@@ -170,12 +172,21 @@ void ObsConfigWidget::_socketDisconnect()
 
 void ObsConfigWidget::_socketgetBinaryData(const QByteArray &message)
 {
-
     QJsonDocument doc = QJsonDocument::fromJson(message);
     qDebug() << "bin " << doc["type"].toString() << " Size: " << message.size();
 
     if (doc["type"].toString() == "OBS")
-        _textArea->setText(doc["payload"].toString());
+        _textArea->setText(_textArea->toPlainText() + doc["payload"].toString());
+    else if (doc["type"].toString() == "cameras_config_reply"){
+        _camerasBox->clear();
+        for (auto i : doc["cameras"].toArray())
+            _camerasBox->addItem(QString::number(i.toInt()));
+
+        _camerasBox->setCurrentText(QString::number(doc["camera"].toInt()));
+        _fps->setText(QString::number(doc["fps"].toInt()));
+        _quality->setText(QString::number(doc["quality"].toInt()));
+        _comboBox->setCurrentText(QString::number(doc["width"].toInt()) + " x " + QString::number(doc["height"].toInt()));
+    }
 }
 
 void ObsConfigWidget::_socketerror(QAbstractSocket::SocketError error)
@@ -185,7 +196,34 @@ void ObsConfigWidget::_socketerror(QAbstractSocket::SocketError error)
 
 void ObsConfigWidget::_parseData()
 {
-    emit newObsData({ 0, 4.4, -4.3, 0, 0, 6.8, -7, 0, 0, 1.6, -1.6, 0, 0, 6.3, -6.4, 0});
+//    QString str = "<h1>MATE 2018 SEISMOGRAPH STATUS</h1>Voltage=4.966 Xangle=-0.128 Yangle=0.005 Count=2</p>DATA: 0, 4.4, -4.3, 0, 0, 6.8, -7, 0, 0, 1.6, -1.6, 0, 0, 6.3, -6.4, 0";
+
+//    QString REG = "DATA: ";
+//    for (int i = 0; i < 16; i++)
+//        REG += "([-+]*\\d+(?:\\.\\d+)*).*?";
+//    qDebug() << REG;
+//    QRegExp rx(REG);
+
+//    QVector<double> data;;
+//    int pos = 0;
+
+//    qDebug() << rx.indexIn(str, pos);
+//    if (rx.indexIn(str, pos) == -1) return;
+//    for (int i = 1; i < 17; i++)
+//        data.push_back(rx.cap(i).toDouble());
+
+//    emit newObsData(data);
+
+    QString str = _textArea->toPlainText();
+    QVector<double> data;
+
+    auto pos = str.indexOf("DATA: ");
+    if (pos == -1) return;
+
+    for (auto i : str.right(str.size() - pos).split(", "))
+        data.push_back(i.toDouble());
+
+    emit newObsData(data);
 }
 
 void ObsConfigWidget::_camInfoUpdate()
